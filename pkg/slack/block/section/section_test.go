@@ -30,5 +30,36 @@ func TestText(t *testing.T) {
 	if sec.Json() != expected(txt.Json()) {
 		t.Errorf("%s", "json failure")
 	}
+}
 
+func TestFields(t *testing.T) {
+	t.Parallel()
+
+	expected := func(s string) string {
+		return fmt.Sprintf(`{"type":"%s","fields":%s}`, TypeSection, s)
+	}
+
+	to := []*text.Text{text.NewMarkDown("*k1*"), text.NewPlain("v1")}
+
+	toJson := func(to []*text.Text) string {
+		json := ""
+		for _, t := range to {
+			if json == "" {
+				json += t.Json()
+			} else {
+				json += fmt.Sprintf(",%s", t.Json())
+			}
+
+		}
+		return fmt.Sprintf("[%s]", json)
+	}
+
+	sec := NewFields(to[0], to[1])
+
+	if sec.Json() != expected(toJson(to)) {
+		t.Errorf("%s", "json failure")
+	}
+
+	fmt.Printf("%s\n", sec.Json())
+	fmt.Printf("%s\n", expected(toJson(to)))
 }

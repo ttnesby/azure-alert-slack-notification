@@ -11,27 +11,27 @@ const (
 )
 
 type Text struct {
-	Type     string `json:"type"` // plain_text, mrkdwn
-	Text     string `json:"text"` // min 1 and max 3 000
-	Emoji    bool   `json:"emoji"`
-	Verbatim bool   `json:"verbatim"`
+	Type  string `json:"type"` // plain_text, mrkdwn
+	Text  string `json:"text"` // min 1 and max 3 000
+	Emoji *bool  `json:"emoji,omitempty"`
+	//verbatim - not implemented
 }
 
-func NewPlain(text string) *Text {
+func NewPlain(s string) *Text {
+	t := new(bool)
+	*t = true
+
 	return (&Text{
-		Type:     TypePlain,
-		Text:     text,
-		Emoji:    true,
-		Verbatim: false,
+		Type:  TypePlain,
+		Text:  s,
+		Emoji: t,
 	}).FirstN(3000)
 }
 
-func NewMarkDown(text string) *Text {
+func NewMarkDown(s string) *Text {
 	return (&Text{
-		Type:     TypeMarkDown,
-		Text:     text,
-		Emoji:    false,
-		Verbatim: false,
+		Type: TypeMarkDown,
+		Text: s,
 	}).FirstN(3000)
 }
 

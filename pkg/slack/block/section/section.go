@@ -22,9 +22,29 @@ func typeSection() *Section {
 	return &Section{Type: TypeSection}
 }
 
-func NewText(text *text.Text) *Section {
+func New(txt *text.Text, fields ...*text.Text) *Section {
+
 	s := typeSection()
-	s.Text = text
+	s.Text = txt
+
+	max2000 := func(f []*text.Text) []*text.Text {
+		for i, t := range f {
+			if len(t.Text) > 2000 {
+				f[i] = t.FirstN(2000)
+			}
+		}
+		return f
+	}
+
+	first10 := func(f []*text.Text) []*text.Text {
+		if len(f) <= 10 {
+			return f
+		} else {
+			return f[:10]
+		}
+	}
+
+	s.Fields = max2000(first10(fields))
 
 	return s
 }
