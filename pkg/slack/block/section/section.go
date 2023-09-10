@@ -16,7 +16,7 @@ type Section[T text.Text[T]] struct {
 func NewText[T text.Text[T]](text *T) *Section[T] {
 	return &Section[T]{
 		Type: "section",
-		Text: (*text).FirstN(3000),
+		Text: text.FirstN(3000),
 	}
 }
 
