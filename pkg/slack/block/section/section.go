@@ -1,6 +1,7 @@
 package section
 
 import (
+	"encoding/json"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 )
 
@@ -35,7 +36,7 @@ func NewFields(key, value *text.Text) *Section {
 	return s
 }
 
-func (s *Section) AddKeyValue(key, value *text.Text) *Section {
+func (s *Section) AddFields(key, value *text.Text) *Section {
 
 	// xor for text versus fields
 	if len(s.Fields) <= 8 && len(s.Text.Text) == 0 {
@@ -44,4 +45,13 @@ func (s *Section) AddKeyValue(key, value *text.Text) *Section {
 	}
 
 	return s
+}
+
+func (s *Section) Json() string {
+	js, err := json.Marshal(s)
+	if err != nil {
+		return "{}"
+	}
+
+	return string(js)
 }

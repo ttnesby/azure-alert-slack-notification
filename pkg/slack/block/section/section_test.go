@@ -1,7 +1,6 @@
 package section
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 	"testing"
@@ -11,23 +10,25 @@ func TestText(t *testing.T) {
 
 	t.Parallel()
 
-	fail := func() {
-		t.Errorf("%s", "failure")
+	expected := func(s string) string {
+		return fmt.Sprintf(`{"type":"%s","text":%s}`, TypeSection, s)
+	}
+	txt := text.NewPlain("hei på deg")
+
+	if NewText(txt).Json() != expected(txt.Json()) {
+		t.Errorf("%s", "json failure")
 	}
 
-	testText := "hei på deg"
-	expected := fmt.Sprintf(`{"type":"section","text":{"type":"plain_text","text":"%s","emoji":true,"verbatim":false}}`, testText)
+	txtM := text.NewMarkDown("hei *på* deg")
 
-	sec := NewText(text.NewPlain(testText))
-	got, err := json.Marshal(sec)
-
-	if err != nil {
-		fail()
+	if NewText(txtM).Json() != expected(txtM.Json()) {
+		t.Errorf("%s", "json failure")
 	}
 
-	if string(got) != expected {
-		fail()
+	// cannot add fields to text section, returning unchanged struct
+	sec := NewText(txt).AddFields(text.NewMarkDown("*key*"), text.NewPlain("value"))
+	if sec.Json() != expected(txt.Json()) {
+		t.Errorf("%s", "json failure")
 	}
 
-	fmt.Printf("%s", got)
 }
