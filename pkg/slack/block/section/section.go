@@ -4,40 +4,44 @@ import (
 	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 )
 
+const (
+	TypeSection = "section"
+)
+
 // https://api.slack.com/reference/block-kit/blocks#section
 
-type Section[T text.Text[T]] struct {
-	Type   string `json:"type"`
-	Text   *T     `json:"text"`   // max 3000 chars
-	Fields []*T   `json:"fields"` // max 10 items, max 2000 chars each
+type Section struct {
+	Type   string       `json:"type"`
+	Text   *text.Text   `json:"text,omitempty"`   // max 3000 chars
+	Fields []*text.Text `json:"fields,omitempty"` // max 10 items, max 2000 chars each
 	//accessory - not implemented
 }
 
-func NewText[T text.Text[T]](text *T) *Section[T] {
-	return &Section[T]{
-		Type: "section",
-		Text: text.FirstN(3000),
-	}
+func typeSection() *Section {
+	return &Section{Type: TypeSection}
 }
 
-func NewFields[T text.Text[T]](text ...*T) *Section[T] {
+func NewText(text *text.Text) *Section {
+	s := typeSection()
+	s.Text = text
 
-	fields := func() []*T {
-		if len(text) > 10 {
-			return text[:10]
-		} else {
-			return text
-		}
-	}()
+	return s
+}
 
-	for i, t := range fields {
-		if (*t).Len() > 2000 {
-			fields[i] = (*t).FirstN(2000)
-		}
+func NewFields(key, value *text.Text) *Section {
+	s := typeSection()
+	s.Fields = []*text.Text{key.FirstN(2000), value.FirstN(2000)}
+
+	return s
+}
+
+func (s *Section) AddKeyValue(key, value *text.Text) *Section {
+
+	// xor for text versus fields
+	if len(s.Fields) <= 8 && len(s.Text.Text) == 0 {
+		s.Fields = append(s.Fields, key.FirstN(2000))
+		s.Fields = append(s.Fields, value.FirstN(2000))
 	}
 
-	return &Section[T]{
-		Type:   "section",
-		Fields: fields,
-	}
+	return s
 }
