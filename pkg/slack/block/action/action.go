@@ -9,13 +9,13 @@ type Action struct {
 	Elements []*button.Button `json:"elements"` // max 25 items
 }
 
-func New(button ...*button.Button) *Action {
+func New(b ...*button.Button) *Action {
 
 	elementsFirstN := func(n int) []*button.Button {
-		if len(button) > n {
-			return button[:n]
+		if len(b) > n {
+			return b[:n]
 		} else {
-			return button
+			return b
 		}
 	}
 

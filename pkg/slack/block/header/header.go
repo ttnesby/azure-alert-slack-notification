@@ -8,7 +8,7 @@ import (
 
 type Header struct {
 	Type string      `json:"type"`
-	Text *text.Plain `json:"text"` // max 150 chars
+	Text *text.Plain `json:"text"` // only plain and max 150 chars
 }
 
 func New(text *text.Plain) *Header {
