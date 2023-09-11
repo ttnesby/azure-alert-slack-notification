@@ -11,9 +11,9 @@ const (
 )
 
 type Text struct {
-	Type  string `json:"type"` // plain_text, mrkdwn
-	Text  string `json:"text"` // min 1 and max 3 000
-	Emoji *bool  `json:"emoji,omitempty"`
+	Type  string `json:"type"`            // plain_text, mrkdwn
+	Text  string `json:"text"`            // min 1 and max 3 000
+	Emoji *bool  `json:"emoji,omitempty"` // only relevant for plain_text
 	//verbatim - not implemented
 }
 

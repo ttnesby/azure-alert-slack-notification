@@ -18,51 +18,41 @@ type Section struct {
 	//accessory - not implemented
 }
 
-func typeSection() *Section {
+func New() *Section {
 	return &Section{Type: TypeSection}
 }
 
-func New(txt *text.Text, fields ...*text.Text) *Section {
+func (s *Section) SetText(txt *text.Text) *Section {
 
-	s := typeSection()
-	s.Text = txt
+	if txt != nil && len(txt.Text) > 0 {
+		s.Text = txt
+	}
 
-	max2000 := func(f []*text.Text) []*text.Text {
-		for i, t := range f {
-			if len(t.Text) > 2000 {
-				f[i] = t.FirstN(2000)
+	return s
+}
+
+func (s *Section) SetFields(fields ...*text.Text) *Section {
+
+	moreThan10 := func() []*text.Text {
+		switch noOfFields := len(fields); {
+		case noOfFields > 10:
+			return fields[:10]
+		default:
+			return fields
+		}
+	}
+
+	lessThan2000 := func(f []*text.Text) []*text.Text {
+		var corrected []*text.Text
+		for _, t := range fields {
+			if t != nil {
+				corrected = append(corrected, t.FirstN(2000))
 			}
 		}
-		return f
+		return corrected
 	}
 
-	first10 := func(f []*text.Text) []*text.Text {
-		if len(f) <= 10 {
-			return f
-		} else {
-			return f[:10]
-		}
-	}
-
-	s.Fields = max2000(first10(fields))
-
-	return s
-}
-
-func NewFields(key, value *text.Text) *Section {
-	s := typeSection()
-	s.Fields = []*text.Text{key.FirstN(2000), value.FirstN(2000)}
-
-	return s
-}
-
-func (s *Section) AddFields(key, value *text.Text) *Section {
-
-	// xor for text versus fields
-	if len(s.Fields) <= 8 && len(s.Text.Text) == 0 {
-		s.Fields = append(s.Fields, key.FirstN(2000))
-		s.Fields = append(s.Fields, value.FirstN(2000))
-	}
+	s.Fields = lessThan2000(moreThan10())
 
 	return s
 }
