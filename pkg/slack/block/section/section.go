@@ -33,7 +33,7 @@ func (s *Section) SetText(txt *text.Text) *Section {
 
 func (s *Section) SetFields(fields ...*text.Text) *Section {
 
-	moreThan10 := func() []*text.Text {
+	lessThan10 := func() []*text.Text {
 		switch noOfFields := len(fields); {
 		case noOfFields > 10:
 			return fields[:10]
@@ -52,7 +52,7 @@ func (s *Section) SetFields(fields ...*text.Text) *Section {
 		return corrected
 	}
 
-	s.Fields = lessThan2000(moreThan10())
+	s.Fields = lessThan2000(lessThan10())
 
 	return s
 }

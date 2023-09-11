@@ -10,7 +10,7 @@ func TestPlain(t *testing.T) {
 	t.Parallel()
 
 	expected := func(s string) string {
-		return fmt.Sprintf(`{"type":"%s","text":"%s","emoji":true,"verbatim":false}`, TypePlain, s)
+		return fmt.Sprintf(`{"type":"%s","text":"%s","emoji":true}`, TypePlain, s)
 	}
 
 	str := "hei på deg"
@@ -36,7 +36,7 @@ func TestMarkDown(t *testing.T) {
 	t.Parallel()
 
 	expected := func(s string) string {
-		return fmt.Sprintf(`{"type":"%s","text":"%s","emoji":false,"verbatim":false}`, TypeMarkDown, s)
+		return fmt.Sprintf(`{"type":"%s","text":"%s"}`, TypeMarkDown, s)
 	}
 
 	str := "hei *på* deg"
