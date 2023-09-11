@@ -1,7 +1,6 @@
 package text
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 )
@@ -10,31 +9,25 @@ func TestPlain(t *testing.T) {
 
 	t.Parallel()
 
-	fail := func() {
-		t.Errorf("%s", "failure")
+	expected := func(s string) string {
+		return fmt.Sprintf(`{"type":"%s","text":"%s","emoji":true,"verbatim":false}`, TypePlain, s)
 	}
 
-	testText := "hei på deg"
+	str := "hei på deg"
+
+	text := NewPlain(str)
+
+	if text.Json() != expected(str) {
+		t.Errorf("%s", "json failure")
+	}
+
 	n := 2
-	expected := fmt.Sprintf(`{"type":"plain_text","text":"%s","emoji":true,"verbatim":false}`, testText)
-
-	text := NewPlain(testText)
-	got, err := json.Marshal(text)
-
-	if err != nil {
-		fail()
+	if str[:n] != text.FirstN(n).Text {
+		t.Errorf("%s", "FirstN failure")
 	}
 
-	if string(got) != expected {
-		fail()
-	}
-
-	if len(testText) != text.Len() {
-		fail()
-	}
-
-	if testText[:n] != text.FirstN(n).Text {
-		fail()
+	if NewPlain("").Json() != expected(EmptyText) {
+		t.Errorf("%s", "empty text jason failure")
 	}
 }
 
@@ -42,30 +35,17 @@ func TestMarkDown(t *testing.T) {
 
 	t.Parallel()
 
-	fail := func() {
-		t.Errorf("%s", "failure")
+	expected := func(s string) string {
+		return fmt.Sprintf(`{"type":"%s","text":"%s","emoji":false,"verbatim":false}`, TypeMarkDown, s)
 	}
 
-	testText := "hei på deg"
-	n := 2
-	expected := fmt.Sprintf(`{"type":"mrkdwn","text":"%s","emoji":false,"verbatim":false}`, testText)
+	str := "hei *på* deg"
 
-	text := NewMarkDown(testText)
-	got, err := json.Marshal(text)
-
-	if err != nil {
-		t.Errorf("failed!")
+	if NewMarkDown(str).Json() != expected(str) {
+		t.Errorf("%s", "json failure")
 	}
 
-	if string(got) != expected {
-		t.Errorf("failure")
-	}
-
-	if len(testText) != text.Len() {
-		fail()
-	}
-
-	if testText[:n] != text.FirstN(n).Text {
-		fail()
+	if NewMarkDown("").Json() != expected(EmptyText) {
+		t.Errorf("%s", "empty text jason failure")
 	}
 }

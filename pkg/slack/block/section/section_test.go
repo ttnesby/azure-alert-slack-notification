@@ -1,40 +1,54 @@
 package section
 
 import (
-	"encoding/json"
 	"fmt"
-	text2 "github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
+	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 	"testing"
 )
 
-func TestPlain(t *testing.T) {
+func listJson(a []*text.Text) string {
+	json := ""
+	for _, t := range a {
+		if json == "" {
+			json += t.Json()
+		} else {
+			json += fmt.Sprintf(",%s", t.Json())
+		}
 
+	}
+	return fmt.Sprintf("[%s]", json)
+}
+
+func TestText(t *testing.T) {
 	t.Parallel()
 
-	fail := func() {
-		t.Errorf("%s", "failure")
+	expected := func(s string) string {
+		return fmt.Sprintf(`{"type":"%s","text":%s}`, TypeSection, s)
+	}
+	txt := text.NewPlain("hei på deg")
+
+	if New().SetText(txt).Json() != expected(txt.Json()) {
+		t.Errorf("%s", "json failure")
 	}
 
-	testText := "hei på deg"
-	n := 2
-	expected := fmt.Sprintf(`{"type":"plain_text","text":"%s","emoji":true,"verbatim":false}`, testText)
+	txtM := text.NewMarkDown("hei *på* deg")
 
-	text := NewText[text.Plain](text2.NewPlain(testText))
-	got, err := json.Marshal(text)
+	if New().SetText(txtM).Json() != expected(txtM.Json()) {
+		t.Errorf("%s", "json failure")
+	}
+}
 
-	if err != nil {
-		fail()
+func TestFields(t *testing.T) {
+	t.Parallel()
+
+	expected := func(s string) string {
+		return fmt.Sprintf(`{"type":"%s","fields":%s}`, TypeSection, s)
 	}
 
-	if string(got) != expected {
-		fail()
-	}
+	to := []*text.Text{text.NewMarkDown("*k1*"), text.NewPlain("v1")}
+	sec := New().SetFields(to[0], to[1])
 
-	if len(testText) != text.Len() {
-		fail()
-	}
-
-	if testText[:n] != text.FirstN(n).Text {
-		fail()
+	if sec.Json() != expected(listJson(to)) {
+		t.Errorf("%s", "json failure")
 	}
 }

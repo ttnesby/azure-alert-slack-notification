@@ -6,15 +6,19 @@ import (
 
 // https://api.slack.com/reference/block-kit/block-elements#button
 
+const (
+	TypeButton = "button"
+)
+
 type Button struct {
-	Type  string      `json:"type"`
-	Text  *text.Plain `json:"text"`            // only plain_text allowed, max 75 chars
-	Url   string      `json:"url"`             // max 3000 chars
-	Style string      `json:"style,omitempty"` // primary, danger
+	Type  string     `json:"type"`
+	Text  *text.Text `json:"text"`            // only plain_text allowed, max 75 chars
+	Url   string     `json:"url"`             // max 3000 chars
+	Style string     `json:"style,omitempty"` // primary, danger
 	//value, confirm, accessibility_label - not implemented
 }
 
-func New(text *text.Plain, url string) *Button {
+func New(s string, url string) *Button {
 
 	urlFirstN := func(n int) string {
 		if len(url) > n {
@@ -25,8 +29,8 @@ func New(text *text.Plain, url string) *Button {
 	}
 
 	return &Button{
-		Type:  "button",
-		Text:  text.FirstN(75),
+		Type:  TypeButton,
+		Text:  text.NewPlain(s).FirstN(75),
 		Url:   urlFirstN(3000),
 		Style: "primary",
 	}
