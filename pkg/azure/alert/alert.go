@@ -1,6 +1,13 @@
 package alert
 
+import "encoding/json"
+
 // https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-common-schema#sample-alert-payload
+
+const (
+	UrlAlertBlade    = "https://portal.azure.com/#blade/Microsoft_Azure_Monitoring/AlertDetailsTemplateBlade/alertId/"
+	UrlResourceBlade = "https://portal.azure.com/#@nav.no/resource"
+)
 
 type Content struct {
 	AlertId             string   `json:"alertId"`
@@ -28,6 +35,10 @@ type CommonAlertSchema struct {
 	Data     Essentials `json:"data"`
 }
 
-func Parse(json string) *CommonAlertSchema {
-	return &CommonAlertSchema{}
+func Parse(s string) *CommonAlertSchema {
+	var alert CommonAlertSchema
+	// TODO do error handling
+	_ = json.Unmarshal([]byte(s), &alert)
+
+	return &alert
 }
