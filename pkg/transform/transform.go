@@ -27,7 +27,7 @@ func severity(a *alert.CommonAlertSchema) string {
 	case "Sev4":
 		return notification.SeverityVerbose
 	default:
-		return "UNKNOWN"
+		return notification.SeverityUnknown
 	}
 }
 

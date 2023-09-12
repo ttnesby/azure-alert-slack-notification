@@ -12,11 +12,12 @@ const (
 	IconRotatingLight = ":rotating_light:"
 	IconLink          = ":link:"
 
-	SeverityVerbose     = ":large_green_circle:  4 - Verbose"
-	SeverityInformation = ":large_blue_circle:  3 - Information"
-	SeverityWarning     = ":large_yellow_circle:  2 - Warning"
-	SeverityError       = ":large_orange_circle:  1 - Error"
-	SeverityCritical    = ":red_circle: 0 - Critical"
+	SeverityUnknown     = ":question: unknown"
+	SeverityVerbose     = ":speech_balloon:  4 - Verbose"
+	SeverityInformation = ":information_source:  3 - Information"
+	SeverityWarning     = ":warning:  2 - Warning"
+	SeverityError       = ":error:  1 - Error"
+	SeverityCritical    = ":severity-critical: 0 - Critical"
 )
 
 type Notification struct {
