@@ -44,7 +44,7 @@ func (s *Section) SetFields(fields ...*text.Text) *Section {
 
 	lessThan2000 := func(f []*text.Text) []*text.Text {
 		var corrected []*text.Text
-		for _, t := range fields {
+		for _, t := range f {
 			if t != nil {
 				corrected = append(corrected, t.FirstN(2000))
 			}

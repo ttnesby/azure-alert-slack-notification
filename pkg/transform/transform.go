@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func severity(a *alert.CommonAlertSchema) string {
+func severity(a *alert.CommonAlertSchema) notification.Severity {
 	switch a.Data.Essentials.Severity {
 	case "Sev0":
 		return notification.SeverityCritical
@@ -51,7 +51,7 @@ func AlertToNotification(a *alert.CommonAlertSchema) string {
 				SetFields(
 					text.NewMarkDown("Fired (UTC)"), text.NewPlain(a.Data.Essentials.FiredDateTime),
 					text.NewMarkDown("Alert name"), text.NewPlain(a.Data.Essentials.AlertRule),
-					text.NewMarkDown("Severity"), text.NewPlain(severity(a)),
+					text.NewMarkDown("Severity"), text.NewPlain(string(severity(a))),
 				),
 		)
 
@@ -67,7 +67,7 @@ func AlertToNotification(a *alert.CommonAlertSchema) string {
 	var resources []*text.Text
 	for _, r := range a.Data.Essentials.AlertTargetIDs {
 		resources = append(resources, text.NewMarkDown(fmt.Sprintf("<%s|%s>", resourceUrl(r), resourceName(r))))
-		resources = append(resources, text.NewPlain(notification.IconLink))
+		resources = append(resources, text.NewPlain(string(notification.IconLink)))
 	}
 
 	if len(resources) > 0 {

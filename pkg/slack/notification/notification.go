@@ -8,16 +8,19 @@ import (
 	"github.com/ttnesby/slack-block-builder/pkg/slack/block/section"
 )
 
-const (
-	IconRotatingLight = ":rotating_light:"
-	IconLink          = ":link:"
+type Icon string
+type Severity string
 
-	SeverityUnknown     = ":question: unknown"
-	SeverityVerbose     = ":speech_balloon:  4 - Verbose"
-	SeverityInformation = ":information_source:  3 - Information"
-	SeverityWarning     = ":warning:  2 - Warning"
-	SeverityError       = ":error:  1 - Error"
-	SeverityCritical    = ":severity-critical: 0 - Critical"
+const (
+	IconRotatingLight Icon = ":rotating_light:"
+	IconLink          Icon = ":link:"
+
+	SeverityUnknown     Severity = ":question: unknown"
+	SeverityVerbose     Severity = ":speech_balloon:  4 - Verbose"
+	SeverityInformation Severity = ":information_source:  3 - Information"
+	SeverityWarning     Severity = ":warning:  2 - Warning"
+	SeverityError       Severity = ":error:  1 - Error"
+	SeverityCritical    Severity = ":severity-critical: 0 - Critical"
 )
 
 type Notification struct {
