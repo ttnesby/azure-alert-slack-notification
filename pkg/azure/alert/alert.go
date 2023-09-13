@@ -1,6 +1,9 @@
 package alert
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/alerts-common-schema#sample-alert-payload
 
@@ -37,8 +40,11 @@ type CommonAlertSchema struct {
 
 func Parse(s string) *CommonAlertSchema {
 	var alert CommonAlertSchema
-	// TODO do error handling
-	_ = json.Unmarshal([]byte(s), &alert)
+	err := json.Unmarshal([]byte(s), &alert)
+
+	if err != nil {
+		fmt.Println(fmt.Errorf("unmarshal failed for %s", s))
+	}
 
 	return &alert
 }

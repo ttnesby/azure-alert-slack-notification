@@ -11,16 +11,16 @@ import (
 type Icon string
 type Severity string
 
+// IconRotatingLight Icon = ":rotating_light:"
 const (
-	IconRotatingLight Icon = ":rotating_light:"
-	IconLink          Icon = ":link:"
+	IconLink Icon = ":link:"
 
 	SeverityUnknown     Severity = ":question: unknown"
-	SeverityVerbose     Severity = ":speech_balloon:  4 - Verbose"
-	SeverityInformation Severity = ":information_source:  3 - Information"
-	SeverityWarning     Severity = ":warning:  2 - Warning"
-	SeverityError       Severity = ":error:  1 - Error"
-	SeverityCritical    Severity = ":severity-critical: 0 - Critical"
+	SeverityVerbose     Severity = ":speech_balloon:  Verbose(4)"
+	SeverityInformation Severity = ":information_source:  Information(3)"
+	SeverityWarning     Severity = ":warning:  Warning(2)"
+	SeverityError       Severity = ":error:  Error(1)"
+	SeverityCritical    Severity = ":severity-critical:  Critical(0)"
 )
 
 type Notification struct {
@@ -61,11 +61,11 @@ func (n *Notification) AddHeader(x *header.Header) *Notification {
 	return add[header.Header](n, x)
 }
 
-func (n *Notification) Json() string {
+func (n *Notification) Json() []byte {
 	js, err := json.Marshal(n)
 	if err != nil {
-		return "{}"
+		return []byte("{}")
 	}
 
-	return string(js)
+	return js
 }

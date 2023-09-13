@@ -31,19 +31,15 @@ func severity(a *alert.CommonAlertSchema) notification.Severity {
 	}
 }
 
-func AlertToNotification(a *alert.CommonAlertSchema) string {
+func AlertToNotification(a *alert.CommonAlertSchema) *notification.Notification {
 
 	alertUrl := alert.UrlAlertBlade + url.QueryEscape(a.Data.Essentials.AlertId)
 
 	payload := notification.New().
-		AddSection(
-			section.New().
-				SetText(
-					text.NewMarkDown(fmt.Sprintf("*Azure monitor alert* %s", notification.IconRotatingLight)),
-				),
-		).
 		AddDivider(divider.New()).
-		AddAction(action.New(button.New("View alert in Azure Monitor", alertUrl))).
+		AddHeader(header.New("New monitor alert!")).
+		AddDivider(divider.New()).
+		AddAction(action.New(button.New("View alert in Monitor", alertUrl))).
 		AddHeader(header.New("Summary")).
 		AddDivider(divider.New()).
 		AddSection(
@@ -77,5 +73,5 @@ func AlertToNotification(a *alert.CommonAlertSchema) string {
 			AddSection(section.New().SetFields(resources...))
 	}
 
-	return payload.Json()
+	return payload
 }

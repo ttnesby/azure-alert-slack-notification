@@ -7,8 +7,7 @@ import (
 )
 
 func main() {
-	json := `
-{
+	json := `{
   "schemaId": "azureMonitorCommonAlertSchema",
   "data": {
     "essentials": {
@@ -19,14 +18,10 @@ func main() {
       "monitorCondition": "Fired",
       "monitoringService": "Platform",
       "alertTargetIDs": [
-        "/subscriptions/1234/resourcegroups/pipelinealertrg/providers/microsoft.compute/virtualmachines/wcus-r2-gen2",
-		"/subscriptions/1234/resourcegroups/pipelinealertrg/providers/microsoft.compute/virtualmachines/wcus-r2-gen3",
-        "/subscriptions/1234/resourcegroups/pipelinealertrg/providers/microsoft.compute/virtualmachines/wcus-r2-gen4",
-		"/subscriptions/1234/resourcegroups/pipelinealertrg/providers/microsoft.compute/virtualmachines/wcus-r2-gen5",
-        "/subscriptions/1234/resourcegroups/pipelinealertrg/providers/microsoft.compute/virtualmachines/wcus-r2-gen6"
+        "/subscriptions/1234/resourcegroups/pipelinealertrg/providers/microsoft.compute/virtualmachines/wcus-r2-gen2"
       ],
       "configurationItems": [
-        "wcus-r2-gen2","wcus-r2-gen3","wcus-r2-gen4","wcus-r2-gen5","wcus-r2-gen6"
+        "wcus-r2-gen2"
       ],
       "originAlertId": "3f2d4487-b0fc-4125-8bd5-7ad17384221e_PipeLineAlertRG_microsoft.insights_metricAlerts_WCUS-R2-Gen2_-117781227",
       "firedDateTime": "2019-03-22T13:58:24.3713213Z",
@@ -39,5 +34,5 @@ func main() {
 }
 `
 
-	fmt.Printf("%s", transform.AlertToNotification(alert.Parse(json)))
+	fmt.Printf("%s", string(transform.AlertToNotification(alert.Parse(json)).Json()))
 }
