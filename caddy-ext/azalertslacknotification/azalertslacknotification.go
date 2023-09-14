@@ -87,9 +87,12 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 
 	an.logger.Info("transformed to slack notification", zap.String("body", string(slackMsg)))
 
+	// must set content length before body https://github.com/caddyserver/caddy/issues/5485
+	r.Header.Set("Content-Length", fmt.Sprint(binary.Size(slackMsg)))
+	an.logger.Info("new content length is set", zap.Int("Content-Length", binary.Size(slackMsg)))
+
 	// replace real body with buffered data
 	r.Body = io.NopCloser(bytes.NewReader(slackMsg))
-	r.Header.Set("Content-Length", fmt.Sprint(binary.Size(slackMsg)))
 
 	return next.ServeHTTP(w, r)
 }
