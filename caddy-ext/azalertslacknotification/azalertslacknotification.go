@@ -6,6 +6,8 @@ package azalertslacknotification
 
 import (
 	"bytes"
+	"encoding/binary"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -41,7 +43,7 @@ func (AzAlertSlackNotif) CaddyModule() caddy.ModuleInfo {
 func (an *AzAlertSlackNotif) Provision(ctx caddy.Context) error {
 	an.logger = ctx.Logger(an)
 
-	an.logger.Info("logger activated", zap.String("logger", "az_alert_slack_notif"))
+	an.logger.Info("logger activated")
 	return nil
 }
 
@@ -59,7 +61,7 @@ func (an *AzAlertSlackNotif) Provision(ctx caddy.Context) error {
 func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 	next caddyhttp.Handler) error {
 
-	an.logger.Info("az_alert_slack_notification", zap.String("activated", "true"))
+	an.logger.Info("received request")
 
 	if r == nil || r.Body == nil {
 		return next.ServeHTTP(w, r)
@@ -87,6 +89,8 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 
 	// replace real body with buffered data
 	r.Body = io.NopCloser(bytes.NewReader(slackMsg))
+	r.Header.Set("Content-Length", fmt.Sprint(binary.Size(slackMsg)))
+
 	return next.ServeHTTP(w, r)
 }
 
