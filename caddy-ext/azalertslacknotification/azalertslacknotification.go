@@ -7,7 +7,6 @@ package azalertslacknotification
 import (
 	"bytes"
 	"context"
-	"encoding/binary"
 	"fmt"
 	"io"
 	"net/http"
@@ -88,19 +87,20 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 
 	an.logger.Info("received azure alert", zap.String("body", buf.String()))
 
-	slackMsg := transform.AlertToNotification(alert.Parse(buf.String())).Json()
+	//slackMsg := transform.AlertToNotification(alert.Parse(buf.String())).Json()
+	smBuf := bytes.NewBuffer(transform.AlertToNotification(alert.Parse(buf.String())).Json())
 
-	an.logger.Info("transformed to slack notification", zap.String("body", string(slackMsg)))
+	an.logger.Info("transformed to slack notification", zap.String("body", string(smBuf.Bytes())))
 
 	// must set content length before body https://github.com/caddyserver/caddy/issues/5485
-	r.Header.Set("Content-Length", fmt.Sprint(binary.Size(slackMsg)))
-	an.logger.Info("new content length is set", zap.Int("Content-Length", binary.Size(slackMsg)))
+	r.Header.Set("Content-Length", fmt.Sprint(smBuf.Cap()))
+	an.logger.Info("new content length is set", zap.Int("Content-Length", smBuf.Cap()))
 
 	// replace real body with buffered data
-	r.Body = io.NopCloser(bytes.NewReader(slackMsg))
+	r.Body = io.NopCloser(smBuf)
 
 	// Add the buffered JSON body into the context for the request.
-	ctx := context.WithValue(r.Context(), bodyBufferCtxKey, &slackMsg)
+	ctx := context.WithValue(r.Context(), bodyBufferCtxKey, smBuf)
 	r = r.WithContext(ctx)
 	an.logger.Info("request context updated with new body")
 
