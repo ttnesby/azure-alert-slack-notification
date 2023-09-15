@@ -6,6 +6,7 @@ package azalertslacknotification
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -16,6 +17,10 @@ import (
 	"github.com/ttnesby/slack-block-builder/pkg/azure/alert"
 	"github.com/ttnesby/slack-block-builder/pkg/transform"
 	"go.uber.org/zap"
+)
+
+const (
+	bodyBufferCtxKey caddy.CtxKey = "body_buffer"
 )
 
 func init() {
@@ -93,6 +98,10 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 
 	// replace real body with buffered data
 	r.Body = io.NopCloser(bytes.NewReader(slackMsg))
+
+	// Add the buffered JSON body into the context for the request.
+	ctx := context.WithValue(r.Context(), bodyBufferCtxKey, &slackMsg)
+	r = r.WithContext(ctx)
 
 	return next.ServeHTTP(w, r)
 }
