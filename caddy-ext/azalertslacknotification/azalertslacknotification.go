@@ -102,6 +102,7 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 	// Add the buffered JSON body into the context for the request.
 	ctx := context.WithValue(r.Context(), bodyBufferCtxKey, &slackMsg)
 	r = r.WithContext(ctx)
+	an.logger.Info("request context updated with new body")
 
 	return next.ServeHTTP(w, r)
 }
