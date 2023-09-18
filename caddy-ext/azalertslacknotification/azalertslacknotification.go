@@ -7,9 +7,9 @@ package azalertslacknotification
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
@@ -19,7 +19,9 @@ import (
 )
 
 const (
-	bodyBufferCtxKey caddy.CtxKey = "body_buffer"
+	fullReqBodyReplPrefix               = "http.request.body."
+	shortReqBodyReplPrefix              = "body."
+	bodyBufferCtxKey       caddy.CtxKey = "body_buffer"
 )
 
 func init() {
@@ -67,44 +69,100 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 
 	an.logger.Info("received request")
 
-	if r == nil || r.Body == nil {
-		return next.ServeHTTP(w, r)
+	transformer := func(key string) (any, bool) {
+
+		key, ok := parseKey(key)
+		if !ok || key == "" {
+			an.logger.Error("invalid var", zap.String("key", key))
+			return nil, false
+		}
+
+		// First of all, try to get the value from the buffered JSON body, if any.
+		buf, ok := r.Context().Value(bodyBufferCtxKey).(*bytes.Buffer)
+		if ok {
+			an.logger.Debug("got from the buffer", zap.String("key", key))
+			return string(transform.AlertToNotification(alert.Parse(buf.String())).Json()), true
+		}
+
+		an.logger.Debug("got from the body", zap.String("key", key))
+
+		// Otherwise, try to get the value by reading the request body.
+		if r == nil || r.Body == nil {
+			return "", true
+		}
+		// Close the real body since we will replace it with a fake one.
+		defer r.Body.Close()
+
+		// Copy the request body.
+		buf = new(bytes.Buffer)
+		if _, err := io.Copy(buf, r.Body); err != nil {
+			return "", true
+		}
+
+		// Replace the real body with buffered data.
+		r.Body = io.NopCloser(buf)
+
+		// Add the buffered JSON body into the context for the request.
+		ctx := context.WithValue(r.Context(), bodyBufferCtxKey, buf)
+		r = r.WithContext(ctx)
+
+		return "", true
+
 	}
 
-	// normally net/http will close the body for us, but since we
-	// are replacing it with a transformed one, we have to ensure we close
-	// the real body ourselves when we're done
+	// if r == nil || r.Body == nil {
+	// 	return next.ServeHTTP(w, r)
+	// }
 
-	defer r.Body.Close()
+	// // normally net/http will close the body for us, but since we
+	// // are replacing it with a transformed one, we have to ensure we close
+	// // the real body ourselves when we're done
 
-	// read the request body into a buffer (can't pool because we
-	// don't know its lifetime and would have to make a copy anyway)
+	// defer r.Body.Close()
 
-	buf := new(bytes.Buffer)
-	if _, err := io.Copy(buf, r.Body); err != nil {
-		return err
-	}
+	// // read the request body into a buffer (can't pool because we
+	// // don't know its lifetime and would have to make a copy anyway)
 
-	an.logger.Info("received azure alert", zap.String("body", buf.String()))
+	// buf := new(bytes.Buffer)
+	// if _, err := io.Copy(buf, r.Body); err != nil {
+	// 	return err
+	// }
 
-	//slackMsg := transform.AlertToNotification(alert.Parse(buf.String())).Json()
-	smBuf := bytes.NewBuffer(transform.AlertToNotification(alert.Parse(buf.String())).Json())
+	// an.logger.Info("received azure alert", zap.String("body", buf.String()))
 
-	an.logger.Info("transformed to slack notification", zap.String("body", string(smBuf.Bytes())))
+	// //slackMsg := transform.AlertToNotification(alert.Parse(buf.String())).Json()
+	// smBuf := bytes.NewBuffer(transform.AlertToNotification(alert.Parse(buf.String())).Json())
 
-	// must set content length before body https://github.com/caddyserver/caddy/issues/5485
-	r.Header.Set("Content-Length", fmt.Sprint(smBuf.Cap()))
-	an.logger.Info("new content length is set", zap.Int("Content-Length", smBuf.Cap()))
+	// an.logger.Info("transformed to slack notification", zap.String("body", string(smBuf.Bytes())))
 
-	// replace real body with buffered data
-	r.Body = io.NopCloser(smBuf)
+	// // must set content length before body https://github.com/caddyserver/caddy/issues/5485
+	// // r.Header.Set("Content-Length", fmt.Sprint(smBuf.Cap()))
+	// // an.logger.Info("new content length is set", zap.Int("Content-Length", smBuf.Cap()))
 
-	// Add the buffered JSON body into the context for the request.
-	ctx := context.WithValue(r.Context(), bodyBufferCtxKey, smBuf)
-	r = r.WithContext(ctx)
-	an.logger.Info("request context updated with new body")
+	// // replace real body with buffered data
+	// r.Body = io.NopCloser(smBuf)
+
+	// // Add the buffered JSON body into the context for the request.
+	// ctx := context.WithValue(r.Context(), bodyBufferCtxKey, smBuf)
+	// r = r.WithContext(ctx)
+	// an.logger.Info("request context updated with new body")
+
+	repl := r.Context().Value(caddy.ReplacerCtxKey).(*caddy.Replacer)
+	repl.Map(transformer)
 
 	return next.ServeHTTP(w, r)
+}
+
+func parseKey(s string) (string, bool) {
+	switch {
+	case strings.HasPrefix(s, fullReqBodyReplPrefix):
+		return s[len(fullReqBodyReplPrefix):], true
+	case strings.HasPrefix(s, shortReqBodyReplPrefix):
+		return s[len(shortReqBodyReplPrefix):], true
+	default:
+		// unrecognized
+		return "", false
+	}
 }
 
 var (
