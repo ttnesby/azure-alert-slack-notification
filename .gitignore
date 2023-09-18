@@ -20,5 +20,7 @@
 # Jetbrains goland
 .idea
 
+.DS_Store
+
 # Go workspace file
 go.work
