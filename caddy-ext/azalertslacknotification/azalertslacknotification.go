@@ -97,10 +97,27 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 		zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}),
 	)
 
+	headers := r.Header
+	headers["Content-Length"] = []string{repl.ReplaceAll(string(rune(len(smBuf.Bytes()))), "")}
+	r.Header = headers
+
 	r.Body = io.NopCloser(bytes.NewBuffer([]byte(repl.ReplaceAll(string(smBuf.Bytes()), ""))))
 	//io.NopCloser(smBuf)
 
 	logger.Info("rewrote request", zap.String("body", string(smBuf.Bytes())))
+
+	r.GetBody = func() (io.ReadCloser, error) {
+
+		buf := new(bytes.Buffer)
+		if _, err := io.Copy(buf, r.Body); err != nil {
+			return nil, err
+		}
+
+		return io.NopCloser(
+			bytes.NewBuffer(
+				transform.AlertToNotification(alert.Parse(buf.String())).Json()),
+		), nil
+	}
 
 	// // must set content length before body https://github.com/caddyserver/caddy/issues/5485
 	// //r.Header.Set("Content-Length", string(rune(len(smBuf.Bytes()))))
