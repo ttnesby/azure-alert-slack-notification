@@ -6,6 +6,7 @@ package azalertslacknotification
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 
@@ -92,16 +93,18 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
 	an.logger.Info("transformed to slack notification", zap.String("body", string(smBuf.Bytes())))
 
 	// must set content length before body https://github.com/caddyserver/caddy/issues/5485
-	r.Header.Set("Content-Length", string(rune(len(smBuf.Bytes()))))
-	an.logger.Info("new content length is set", zap.Int("Content-Length", len(smBuf.Bytes())))
+	//r.Header.Set("Content-Length", string(rune(len(smBuf.Bytes()))))
+	//an.logger.Info("new content length is set", zap.Int("Content-Length", len(smBuf.Bytes())))
 
 	// replace real body with buffered data
 	r.Body = io.NopCloser(smBuf)
 
+	an.logger.Info("request", zap.Any("context", r.Context()))
+
 	// Add the buffered JSON body into the context for the request.
-	//ctx := context.WithValue(r.Context(), BodyCtxKey, smBuf)
-	r, _ = http.NewRequestWithContext(r.Context(), r.Method, r.URL.Host, smBuf)
-	//r = r.WithContext(ctx)
+	ctx := context.WithValue(r.Context(), bodyBufferCtxKey, io.NopCloser(smBuf))
+	//r, _ = http.NewRequestWithContext(r.Context(), r.Method, r.URL.Host, smBuf)
+	r = r.WithContext(ctx)
 	// an.logger.Info("request context updated with new body", zap.Any("context", r.Context()))
 
 	return next.ServeHTTP(w, r)
