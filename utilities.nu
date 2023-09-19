@@ -20,20 +20,18 @@ export def-env env-setup [] {
     }
 }
 
-export def ca-r [] {
-    ca-d
+export def r-ca [] {
     gh release create ($in) --notes "wip"
-    $in | ca-b
-    ca-up
+    $in | b-ca
 }
 
-export def ca-b [] {
+export def b-ca [] {
     let ext1 = $"github.com/ttnesby/slack-block-builder/caddy-ext/azalertslacknotification@($in)" 
     ~/go/bin/xcaddy build --with ($ext1)
 }
-export def ca-u [] {
+export def u-ca [] {
     ./caddy start Caddyfile
 }
-export def ca-d [] {
+export def d-ca [] {
     ./caddy stop
 }
