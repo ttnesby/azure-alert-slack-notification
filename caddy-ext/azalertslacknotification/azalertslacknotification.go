@@ -6,6 +6,7 @@ package azalertslacknotification
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -95,7 +96,7 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer)
 
 	readCloser, length, err := doTransform()
 
-	r.Header.Set("Content-Length", string(rune(length)))
+	r.Header.Set("Content-Length", fmt.Sprintf("%d", length))
 	r.Body = readCloser
 	r.GetBody = func() (io.ReadCloser, error) {
 		return readCloser, err
