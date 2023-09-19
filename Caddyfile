@@ -16,7 +16,7 @@ http://localhost {
 	# rate_limit details
 	# waf details
 
-	route /transform* {
+	route /transform/test* {
 		# reverse_proxy http://localhost:8080 {
 		# 	method PUT
 
@@ -33,9 +33,11 @@ http://localhost {
 		# }
 
 		# respond {http.request.body}
+		rewrite /transform/test* {$SLACK_TEST_NOTIFICATION}
+
 		az_alert_slack_notification
 
-		rewrite /transform/test* {$SLACK_TEST_NOTIFICATION}
+		#request_header "Content-Length" 1315
 
 		reverse_proxy https://hooks.slack.com {
 			header_up Host {upstream_hostport}
