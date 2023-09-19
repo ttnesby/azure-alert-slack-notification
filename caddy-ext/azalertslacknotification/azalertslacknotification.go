@@ -6,6 +6,7 @@ package azalertslacknotification
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -106,6 +107,10 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer)
 	r.GetBody = func() (io.ReadCloser, error) {
 		return readCloser, err
 	}
+
+	ctx := context.WithValue(r.Context(), "http.request.body", readCloser)
+	r = r.WithContext(ctx)
+
 }
 
 var (

@@ -1,41 +1,41 @@
-http://localhost:8080 {
-	log {
-		format console
-	}
-	route /services* {
-		az_alert_slack_notification
-		respond {http.request.body}
-	}
-}
+# http://localhost:8080 {
+# 	log {
+# 		format console
+# 	}
+# 	route /transform* {
+# 		az_alert_slack_notification
+# 		respond {http.request.body}
+# 	}
+# }
 
 http://localhost {
 	log {
 		format console
 	}
-	encode zstd gzip
+	#encode zstd gzip
 	# rate_limit details
 	# waf details
 
 	route /transform* {
+		# reverse_proxy http://localhost:8080 {
+		# 	method PUT
+
+		# 	# header_up X-Forwarded-Method {method}
+		# 	# header_up X-Forwarded-Uri {uri}
+
+		# 	@good status 2xx
+		# 	handle_response @good {
+		# 		copy_response
+		# 		copy_response_headers
+		# 		request_header Content-Type {rp.header.Content-Type}
+		# 		request_header Content-Length {rp.header.Content-Length}
+		# 	}
+		# }
+
+		# respond {http.request.body}
+		az_alert_slack_notification
+
 		rewrite /transform/test* {$SLACK_TEST_NOTIFICATION}
-
-		reverse_proxy http://localhost:8080 {
-			method GET
-
-			# header_up X-Forwarded-Method {method}
-			# header_up X-Forwarded-Uri {uri}
-
-			@good status 2xx
-			handle_response @good {
-				# request_header {
-				# 	# for example, for each copy_headers field...
-				# 	# Content-Length {rp.header.Content-Length}
-				# }
-				#request_body {http.response.body}
-			}
-		}
-
-		respond {http.body.request}
 
 		reverse_proxy https://hooks.slack.com {
 			header_up Host {upstream_hostport}
