@@ -1,7 +1,7 @@
 
 export def alert-t [] {
     '{"schemaId":"azureMonitorCommonAlertSchema","data":{"essentials":{"alertId":"/subscriptions/9876/providers/Microsoft.AlertsManagement/alerts/b9569717-bc32-442f-add5-83a997729330","alertRule":"Test-Rule-1","severity":"Sev4","signalType":"Metric","monitorCondition":"Fired","monitoringService":"Platform","alertTargetIDs":["/subscriptions/1234/resourcegroups/pipelinealertrg/providers/microsoft.compute/virtualmachines/wcus-r2-gen2"],"configurationItems":["wcus-r2-gen2"],"originAlertId":"3f2d4487-b0fc-4125-8bd5-7ad17384221e_PipeLineAlertRG_microsoft.insights_metricAlerts_WCUS-R2-Gen2_-117781227","firedDateTime":"2019-03-22T13:58:24.3713213Z","resolvedDateTime":"2019-03-22T14:03:16.2246313Z","description":"","essentialsVersion":"1.0","alertContextVersion":"1.0"}}}' |
-    curl --header "Content-Type: application/json" --include --data $'($in)'  http://localhost/transform/test
+    curl --header "Content-Type: application/json" --include --data $'($in)'  http://localhost:80/transform/test
 }
 
 export def alert-p [] {
@@ -23,15 +23,15 @@ export def-env env-setup [] {
 export def r-ca [] {
     let ver = $in
     gh release create ($in) --notes "wip"
-    $ver | b-ca
+    b-ca $ver
 }
 
-export def b-ca [] {
-    let ext1 = $"github.com/ttnesby/slack-block-builder/caddy-ext/azalertslacknotification@($in)" 
+export def b-ca [ver: string] {
+    let ext1 = $"github.com/ttnesby/slack-block-builder/caddy-ext/azalertslacknotification@($ver)" 
     ~/go/bin/xcaddy build --with ($ext1)
 }
 export def u-ca [] {
-    ./caddy start --watch Caddyfile
+    ./caddy start Caddyfile
 }
 export def d-ca [] {
     ./caddy stop

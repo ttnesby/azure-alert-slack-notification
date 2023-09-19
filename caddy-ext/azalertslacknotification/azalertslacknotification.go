@@ -66,9 +66,11 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request, ne
 
 	repl := r.Context().Value(caddy.ReplacerCtxKey).(*caddy.Replacer)
 
+	an.logger.Info("before transformation", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
+
 	an.TransformBody(r, repl)
 
-	an.logger.Info("transformation done", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
+	an.logger.Info("after transformation", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
 
 	return next.ServeHTTP(w, r)
 }
@@ -83,7 +85,12 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer)
 		buf := new(bytes.Buffer)
 		_, _ = io.Copy(buf, r.Body) // cannot do reasonable error handling
 
+		an.logger.Info("before body", zap.String("body", buf.String()))
+
 		r := transform.AlertToNotification(alert.Parse(buf.String())).Json()
+
+		an.logger.Info("transformed body", zap.String("body", string(r)))
+
 		return io.NopCloser(bytes.NewBuffer(r)), len(r), nil
 	}
 
