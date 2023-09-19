@@ -1,0 +1,26 @@
+## - secret @ reverse proxy
+
+http://localhost {
+	log {
+		format console
+	}
+	encode zstd gzip
+	# rate_limit details
+	# waf details
+
+	route /transform* {
+		az_alert_slack_notification
+		#respond {http.request.body}
+
+		rewrite /transform/test* {$SLACK_TEST_NOTIFICATION}
+		#rewrite /transform/prod* {$SLACK_PROD_NOTIFICATION}
+
+		reverse_proxy https://hooks.slack.com {
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	handle /health* {
+		respond "I'm fine" 200
+	}
+}

@@ -20,7 +20,11 @@
 # Jetbrains goland
 .idea
 
+# Visual Code Studio
 .DS_Store
+
+# Generated caddy executable
+caddy
 
 # Go workspace file
 go.work
