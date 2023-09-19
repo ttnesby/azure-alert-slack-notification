@@ -80,12 +80,12 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer)
 		return
 	}
 
-	doTransform := func() (io.ReadCloser, error) {
+	doTransform := func() (io.ReadCloser, int, error) {
 		buf := new(bytes.Buffer)
 		_, _ = io.Copy(buf, r.Body) // cannot do reasonable error handling
 
 		r := transform.AlertToNotification(alert.Parse(buf.String())).Json()
-		return io.NopCloser(bytes.NewBuffer(r)), nil
+		return io.NopCloser(bytes.NewBuffer(r)), len(r), nil
 	}
 
 	// normally net/http will close the body for us, but since we
@@ -93,9 +93,12 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer)
 	// the real body ourselves when we're done
 	defer r.Body.Close()
 
-	r.Body, _ = doTransform()
+	readCloser, length, err := doTransform()
+
+	r.Header.Set("Content-Length", string(rune(length)))
+	r.Body = readCloser
 	r.GetBody = func() (io.ReadCloser, error) {
-		return doTransform()
+		return readCloser, err
 	}
 }
 
