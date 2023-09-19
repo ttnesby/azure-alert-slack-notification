@@ -22,7 +22,7 @@ export def-env env-setup [] {
 
 export def r-ca [] {
     let ver = $in
-    gh release create ($in) --notes "wip"
+    gh release create ($ver) --notes "wip"
     b-ca $ver
 }
 
