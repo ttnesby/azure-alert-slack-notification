@@ -61,80 +61,42 @@ func (an *AzAlertSlackNotif) Provision(ctx caddy.Context) error {
 // }
 
 // ServeHTTP implements the caddyhttp.MiddlewareHandler interface.
-func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request,
-	next caddyhttp.Handler) error {
+func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 
-	an.logger.Info("received request")
+	repl := r.Context().Value(caddy.ReplacerCtxKey).(*caddy.Replacer)
+
+	logger := an.logger.With(zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
+
+	an.TransformBody(r, repl)
+
+	logger.Info("request", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
+
+	return next.ServeHTTP(w, r)
+}
+
+func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer) {
 
 	if r == nil || r.Body == nil {
-		return next.ServeHTTP(w, r)
+		return
+	}
+
+	doTransform := func() (io.ReadCloser, error) {
+		buf := new(bytes.Buffer)
+		_, _ = io.Copy(buf, r.Body) // cannot do reasonable error handling
+
+		r := transform.AlertToNotification(alert.Parse(buf.String())).Json()
+		return io.NopCloser(bytes.NewBuffer(r)), nil
 	}
 
 	// normally net/http will close the body for us, but since we
 	// are replacing it with a transformed one, we have to ensure we close
 	// the real body ourselves when we're done
-
 	defer r.Body.Close()
 
-	// read the request body into a buffer (can't pool because we
-	// don't know its lifetime and would have to make a copy anyway)
-
-	buf := new(bytes.Buffer)
-	if _, err := io.Copy(buf, r.Body); err != nil {
-		return err
-	}
-
-	an.logger.Info("received azure alert", zap.String("body", buf.String()))
-
-	//slackMsg := transform.AlertToNotification(alert.Parse(buf.String())).Json()
-	smBuf := bytes.NewBuffer(transform.AlertToNotification(alert.Parse(buf.String())).Json())
-
-	an.logger.Info("transformed to slack notification", zap.String("body", string(smBuf.Bytes())))
-
-	repl := r.Context().Value(caddy.ReplacerCtxKey).(*caddy.Replacer)
-
-	logger := an.logger.With(
-		zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}),
-	)
-
-	headers := r.Header
-	headers["Content-Length"] = []string{repl.ReplaceAll(string(rune(len(smBuf.Bytes()))), "")}
-	r.Header = headers
-
-	r.Body = io.NopCloser(bytes.NewBuffer([]byte(repl.ReplaceAll(string(smBuf.Bytes()), ""))))
-	//io.NopCloser(smBuf)
-
-	logger.Info("rewrote request", zap.String("body", string(smBuf.Bytes())))
-
+	r.Body, _ = doTransform()
 	r.GetBody = func() (io.ReadCloser, error) {
-
-		buf := new(bytes.Buffer)
-		if _, err := io.Copy(buf, r.Body); err != nil {
-			return nil, err
-		}
-
-		return io.NopCloser(
-			bytes.NewBuffer(
-				transform.AlertToNotification(alert.Parse(buf.String())).Json()),
-		), nil
+		return doTransform()
 	}
-
-	// // must set content length before body https://github.com/caddyserver/caddy/issues/5485
-	// //r.Header.Set("Content-Length", string(rune(len(smBuf.Bytes()))))
-	// //an.logger.Info("new content length is set", zap.Int("Content-Length", len(smBuf.Bytes())))
-
-	// // replace real body with buffered data
-	// r.Body = io.NopCloser(smBuf)
-
-	// an.logger.Info("request", zap.Any("context", r.Context()))
-
-	// // Add the buffered JSON body into the context for the request.
-	// ctx := context.WithValue(r.Context(), "Body", io.NopCloser(smBuf))
-	// //r, _ = http.NewRequestWithContext(r.Context(), r.Method, r.URL.Host, smBuf)
-	// r = r.WithContext(ctx)
-	// // an.logger.Info("request context updated with new body", zap.Any("context", r.Context()))
-
-	return next.ServeHTTP(w, r)
 }
 
 var (
