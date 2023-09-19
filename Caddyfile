@@ -10,7 +10,7 @@ http://localhost {
 
 	route /transform* {
 		az_alert_slack_notification
-		respond {http.request.body}
+		#respond {http.request.body}
 
 		rewrite /transform/test* {$SLACK_TEST_NOTIFICATION}
 		#rewrite /transform/prod* {$SLACK_PROD_NOTIFICATION}

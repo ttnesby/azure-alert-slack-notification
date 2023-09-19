@@ -66,11 +66,9 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request, ne
 
 	repl := r.Context().Value(caddy.ReplacerCtxKey).(*caddy.Replacer)
 
-	logger := an.logger.With(zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
-
 	an.TransformBody(r, repl)
 
-	logger.Info("request", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
+	an.logger.Info("transformation done", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
 
 	return next.ServeHTTP(w, r)
 }

@@ -21,8 +21,9 @@ export def-env env-setup [] {
 }
 
 export def r-ca [] {
+    let ver = $in
     gh release create ($in) --notes "wip"
-    $in | b-ca
+    $ver | b-ca
 }
 
 export def b-ca [] {
@@ -30,7 +31,7 @@ export def b-ca [] {
     ~/go/bin/xcaddy build --with ($ext1)
 }
 export def u-ca [] {
-    ./caddy start Caddyfile
+    ./caddy start --watch Caddyfile
 }
 export def d-ca [] {
     ./caddy stop
