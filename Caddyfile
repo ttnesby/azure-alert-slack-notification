@@ -1,29 +1,29 @@
 {
 	log {
 		format console
-		level debug
+		level info
 	}
 }
 
 (to-slack) {
+	az_alert_slack_notification
 	reverse_proxy https://hooks.slack.com {
 		header_up Host {upstream_hostport}
-		rewrite {$SLACK_TEST_NOTIFICATION}
 	}
 }
 
 http://localhost {
-	#encode zstd gzip
+	encode zstd gzip
 	# rate_limit details
 	# waf details
 
-	route /transform/test* {
-		az_alert_slack_notification
-		#respond {http.request.body}
+	route /slack/testvarsel* {
+		rewrite {$SLACK_TEST_NOTIFICATION}
 		import to-slack
 	}
 
-	route /direct/test* {
+	route /slack/azureplatformalerts* {
+		rewrite {$SLACK_PROD_NOTIFICATION}
 		import to-slack
 	}
 

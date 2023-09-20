@@ -1,9 +1,5 @@
 package azalertslacknotification
 
-// see https://github.com/caddyserver/caddy/blob/6f0f159ba56adeb6e2cbbb408651419b87f20856/modules/caddyhttp/replacer.go
-// see https://github.com/RussellLuo/caddy-ext/blob/master/requestbodyvar/requestbodyvar.go
-// see https://github.com/caddyserver/caddy/blob/master/modules/caddyhttp/requestbody/requestbody.go
-
 import (
 	"bytes"
 	"fmt"
@@ -31,7 +27,6 @@ func init() {
 
 // of the URI matches a given prefix.
 type AzAlertSlackNotif struct {
-	//Prefix string `json:"prefix,omitempty"`
 	logger *zap.Logger
 }
 
@@ -51,15 +46,10 @@ func (an *AzAlertSlackNotif) Provision(ctx caddy.Context) error {
 	return nil
 }
 
-// Validate the prefix from the module's configuration, setting the
-// default prefix "." if necessary.
-
-// func (an *AzAlertSlackNotif) Validate() error {
-// 	if an.Prefix == "" {
-// 		an.Prefix = "."
-// 	}
-// 	return nil
-// }
+func (an *AzAlertSlackNotif) Validate() error {
+	// nothing to validate
+	return nil
+}
 
 // ServeHTTP implements the caddyhttp.MiddlewareHandler interface.
 func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
@@ -81,15 +71,16 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
 
 	doTransform := func() (io.ReadCloser, int, error) {
 		buf := new(bytes.Buffer)
-		_, _ = io.Copy(buf, r.Body) // cannot do reasonable error handling
+		_, _ = io.Copy(buf, r.Body) // reasonable error handling, not yet...
 
 		an.logger.Debug("before body", zap.String("body", buf.String()))
 
 		r := transform.AlertToNotification(alert.Parse(buf.String())).Json()
 
 		an.logger.Debug("transformed body", zap.String("body", string(r)))
+		transformedBuf := bytes.NewBuffer(r)
 
-		return io.NopCloser(bytes.NewBuffer(r)), bytes.NewBuffer(r).Len(), nil
+		return io.NopCloser(transformedBuf), transformedBuf.Len(), nil
 	}
 
 	// normally net/http will close the body for us, but since we
@@ -108,7 +99,7 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
 }
 
 var (
-	_ caddy.Provisioner = (*AzAlertSlackNotif)(nil)
-	//_ caddy.Validator             = (*AzAlertSlackNotif)(nil)
+	_ caddy.Provisioner           = (*AzAlertSlackNotif)(nil)
+	_ caddy.Validator             = (*AzAlertSlackNotif)(nil)
 	_ caddyhttp.MiddlewareHandler = (*AzAlertSlackNotif)(nil)
 )
