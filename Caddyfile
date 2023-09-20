@@ -5,12 +5,12 @@
 	}
 }
 
-# http://localhost:8888 {
-# 	route /transform/test* {
-# 		az_alert_slack_notification
-# 		respond {http.request.body}
-# 	}
-# }
+(to-slack) {
+	reverse_proxy https://hooks.slack.com {
+		header_up Host {upstream_hostport}
+		rewrite {$SLACK_TEST_NOTIFICATION}
+	}
+}
 
 http://localhost {
 	#encode zstd gzip
@@ -19,24 +19,12 @@ http://localhost {
 
 	route /transform/test* {
 		az_alert_slack_notification
-		# reverse_proxy http://localhost:8888 {
-		# 	method PUT
-		# 	@good status 2xx
-		# 	handle_response @good {
-		# 		# copy_response
-		# 		# copy_response_headers
-		# 		# reverse_proxy https://hooks.slack.com {
-		# 		# 	header_up Host {upstream_hostport}
-		# 		# 	method POST
-		# 		# 	rewrite {$SLACK_TEST_NOTIFICATION}
-		# 		# }
-		# 	}
-		# }
 		#respond {http.request.body}
-		reverse_proxy https://hooks.slack.com {
-			header_up Host {upstream_hostport}
-			rewrite {$SLACK_TEST_NOTIFICATION}
-		}
+		import to-slack
+	}
+
+	route /direct/test* {
+		import to-slack
 	}
 
 	handle /health* {
