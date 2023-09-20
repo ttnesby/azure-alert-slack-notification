@@ -32,8 +32,9 @@ http://localhost:8080 {
 	}
 }
 
-# OWASP top 10 - web application firewall
+# entry point for azure container app
 http://localhost {
+	# OWASP top 10 - web application firewall
 	coraza_waf {
 		load_owasp_crs
 		directives `
