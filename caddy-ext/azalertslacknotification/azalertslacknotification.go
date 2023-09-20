@@ -100,6 +100,7 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
 	readCloser, length, err := doTransform()
 
 	r.Header.Set("Content-Length", fmt.Sprintf("%d", length))
+	r.ContentLength = int64(length)
 	r.Body = readCloser
 	r.GetBody = func() (io.ReadCloser, error) {
 		return readCloser, err
