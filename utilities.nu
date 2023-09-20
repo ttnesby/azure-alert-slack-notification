@@ -28,7 +28,9 @@ export def r-ca [] {
 
 export def b-ca [ver: string] {
     let ext1 = $"github.com/ttnesby/slack-block-builder/caddy-ext/azalertslacknotification@($ver)" 
-    ~/go/bin/xcaddy build --with ($ext1)
+    let ext2 = $"github.com/corazawaf/coraza-caddy/v2"  # waf
+    let ext3 = $"github.com/mholt/caddy-ratelimit"      # rate limiter
+    ~/go/bin/xcaddy build --with ($ext1) --with ($ext2) --with ($ext3)
 }
 export def u-ca [] {
     ./caddy start Caddyfile

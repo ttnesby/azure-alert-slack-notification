@@ -1,4 +1,7 @@
 {
+	order coraza_waf first
+	order rate_limit before basicauth
+
 	log {
 		format console
 		level info
@@ -9,25 +12,48 @@
 	az_alert_slack_notification
 	reverse_proxy https://hooks.slack.com {
 		header_up Host {upstream_hostport}
+		rewrite {args[0]}
 	}
 }
 
-http://localhost {
+http://localhost:8080 {
 	encode zstd gzip
 	# rate_limit details
-	# waf details
 
 	route /slack/testvarsel* {
-		rewrite {$SLACK_TEST_NOTIFICATION}
-		import to-slack
+		import to-slack {$SLACK_TEST_NOTIFICATION}
 	}
 
 	route /slack/azureplatformalerts* {
-		rewrite {$SLACK_PROD_NOTIFICATION}
-		import to-slack
+		import to-slack {$SLACK_PROD_NOTIFICATION}
 	}
 
 	handle /health* {
 		respond "I'm fine" 200
 	}
+}
+
+# OWASP top 10 - web application firewall
+http://localhost {
+	coraza_waf {
+		load_owasp_crs
+		directives `
+		Include @coraza.conf-recommended
+		Include @crs-setup.conf.example
+		Include @owasp_crs/*.conf
+		SecRuleEngine On
+		`
+	}
+
+	# maximum 120 events within 1 minute
+	rate_limit {
+		distributed
+		zone static_example {
+			key static
+			events 120
+			window 1m
+		}
+	}
+
+	reverse_proxy http://localhost:8080
 }
