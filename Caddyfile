@@ -18,7 +18,6 @@
 
 http://localhost:8080 {
 	encode zstd gzip
-	# rate_limit details
 
 	route /slack/testvarsel* {
 		import to-slack {$SLACK_TEST_NOTIFICATION}
@@ -45,7 +44,7 @@ http://localhost {
 		`
 	}
 
-	# maximum 120 events within 1 minute
+	# rate limit - maximum 120 events within 1 minute
 	rate_limit {
 		distributed
 		zone static_example {
