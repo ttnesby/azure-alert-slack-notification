@@ -64,18 +64,16 @@ func (an *AzAlertSlackNotif) Provision(ctx caddy.Context) error {
 // ServeHTTP implements the caddyhttp.MiddlewareHandler interface.
 func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Handler) error {
 
-	repl := r.Context().Value(caddy.ReplacerCtxKey).(*caddy.Replacer)
-
 	an.logger.Debug("before transformation", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
 
-	an.TransformBody(r, repl)
+	an.TransformBody(r)
 
 	an.logger.Debug("after transformation", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
 
 	return next.ServeHTTP(w, r)
 }
 
-func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer) {
+func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
 
 	if r == nil || r.Body == nil {
 		return
@@ -91,7 +89,7 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer)
 
 		an.logger.Debug("transformed body", zap.String("body", string(r)))
 
-		return io.NopCloser(bytes.NewBuffer(r)), len(r), nil
+		return io.NopCloser(bytes.NewBuffer(r)), bytes.NewBuffer(r).Len(), nil
 	}
 
 	// normally net/http will close the body for us, but since we
@@ -106,10 +104,6 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request, repl *caddy.Replacer)
 	r.GetBody = func() (io.ReadCloser, error) {
 		return readCloser, err
 	}
-
-	// ctx := context.WithValue(r.Context(), "http.request.body", readCloser)
-	// r = r.WithContext(ctx)
-
 }
 
 var (
