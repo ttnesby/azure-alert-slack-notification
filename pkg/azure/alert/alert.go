@@ -10,6 +10,7 @@ import (
 const (
 	UrlAlertBlade    = "https://portal.azure.com/#blade/Microsoft_Azure_Monitoring/AlertDetailsTemplateBlade/alertId/"
 	UrlResourceBlade = "https://portal.azure.com/#@nav.no/resource"
+	SchemaIdValue    = "azureMonitorCommonAlertSchema"
 )
 
 type Content struct {
