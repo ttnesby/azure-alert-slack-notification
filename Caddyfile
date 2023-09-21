@@ -19,16 +19,20 @@
 http://localhost:8080 {
 	encode zstd gzip
 
-	route /slack/testvarsel* {
+	route /api/slack/testevarsel* {
 		import to-slack {$SLACK_TEST_NOTIFICATION}
 	}
 
-	route /slack/azureplatformalerts* {
+	route /api/slack/azureplatformalerts* {
 		import to-slack {$SLACK_PROD_NOTIFICATION}
 	}
 
-	handle /health* {
+	handle /api/health* {
 		respond "I'm fine" 200
+	}
+
+	handle_err {
+		respond 400 # bad request
 	}
 }
 

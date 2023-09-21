@@ -10,8 +10,6 @@ import (
 const (
 	UrlAlertBlade    = "https://portal.azure.com/#blade/Microsoft_Azure_Monitoring/AlertDetailsTemplateBlade/alertId/"
 	UrlResourceBlade = "https://portal.azure.com/#@nav.no/resource"
-	SchemaIdValue    = "azureMonitorCommonAlertSchema"
-	ContentType      = "application/json"
 )
 
 type Content struct {
@@ -49,4 +47,12 @@ func Parse(s string) *CommonAlertSchema {
 	}
 
 	return &alert
+}
+
+func ContentTypeSupported(ct string) bool {
+	return (ct == "application/json")
+}
+
+func (cas *CommonAlertSchema) SchemaIdSupported() bool {
+	return (cas.SchemaId == "azureMonitorCommonAlertSchema")
 }

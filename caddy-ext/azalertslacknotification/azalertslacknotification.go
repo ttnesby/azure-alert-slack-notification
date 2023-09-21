@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 
 	"github.com/caddyserver/caddy/v2"
@@ -51,40 +52,58 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request, ne
 
 	an.logger.Debug("before transformation", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
 
-	an.TransformBody(r)
-
-	an.logger.Debug("after transformation", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
+	if err := an.transformedBody(r); err != nil {
+		an.logger.Debug("no transformation")
+		return err
+	} else {
+		an.logger.Debug("after transformation", zap.Object("request", caddyhttp.LoggableHTTPRequest{Request: r}))
+	}
 
 	return next.ServeHTTP(w, r)
 }
 
-func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
+func (an AzAlertSlackNotif) transformedBody(r *http.Request) error {
 
 	if r == nil || r.Body == nil {
-		return
+		an.logger.Warn("empty request or body")
+		return fmt.Errorf("empty request or body")
 	}
 
-	// verify Content-Type application/json
-	if ct := r.Header.Get("Content-Type"); ct != alert.ContentType {
-		an.logger.Warn("unsupported content type", zap.String("Content-Type", ct))
+	mType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+
+	if err != nil {
+		an.logger.Error("couldn't parse media type", zap.Error(err))
+		return err
+	}
+
+	if !alert.ContentTypeSupported(mType) {
+		an.logger.Warn("unsupported media type", zap.String("Content-Type", mType))
+		return fmt.Errorf("unsupported media type: %s", mType)
 	}
 
 	doTransform := func() (io.ReadCloser, int, error) {
 
-		buf := new(bytes.Buffer)
-		if _, err := io.Copy(buf, r.Body); err != nil {
+		existingBodyBuf := new(bytes.Buffer)
+		if _, err := io.Copy(existingBodyBuf, r.Body); err != nil {
 			an.logger.Error("couldn't get body", zap.Error(err))
+			return nil, 0, err
 		}
 
-		an.logger.Debug("before body", zap.String("body", buf.String()))
+		an.logger.Debug("existing body", zap.String("body", existingBodyBuf.String()))
 
-		// verify "schemaId":"azureMonitorCommonAlertSchema"
-		r := transform.AlertToNotification(alert.Parse(buf.String())).Json()
+		alert := alert.Parse(existingBodyBuf.String())
 
-		an.logger.Debug("transformed body", zap.String("body", string(r)))
-		transformedBuf := bytes.NewBuffer(r)
+		if !alert.SchemaIdSupported() {
+			an.logger.Warn("unsupported schema id", zap.String("SchemaId", alert.SchemaId))
+			return nil, 0, fmt.Errorf("unsupported schema id: %s", alert.SchemaId)
+		}
 
-		return io.NopCloser(transformedBuf), transformedBuf.Len(), nil
+		notificationByte := transform.AlertToNotification(alert).Json()
+
+		an.logger.Debug("transformed body", zap.String("body", string(notificationByte)))
+		notificationBuf := bytes.NewBuffer(notificationByte)
+
+		return io.NopCloser(notificationBuf), notificationBuf.Len(), nil
 	}
 
 	// normally net/http will close the body for us, but since we
@@ -92,14 +111,18 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
 	// the real body ourselves when we're done
 	defer r.Body.Close()
 
-	readCloser, length, err := doTransform()
-
-	r.Header.Set("Content-Length", fmt.Sprintf("%d", length))
-	r.ContentLength = int64(length)
-	r.Body = readCloser
-	r.GetBody = func() (io.ReadCloser, error) {
-		return readCloser, err
+	if readCloser, length, err := doTransform(); err != nil {
+		return err
+	} else {
+		r.Header.Set("Content-Length", fmt.Sprintf("%d", length))
+		r.ContentLength = int64(length)
+		r.Body = readCloser
+		r.GetBody = func() (io.ReadCloser, error) {
+			return readCloser, nil
+		}
 	}
+
+	return nil
 }
 
 var (
