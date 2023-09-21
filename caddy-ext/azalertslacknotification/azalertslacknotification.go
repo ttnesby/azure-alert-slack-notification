@@ -13,11 +13,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	BodyCtxKey       caddy.CtxKey = "body"
-	bodyBufferCtxKey caddy.CtxKey = "body_buffer"
-)
-
 func init() {
 	caddy.RegisterModule(AzAlertSlackNotif{})
 }
