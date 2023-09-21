@@ -14,6 +14,15 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	ErrorNilReqBody           = "nil request or body"
+	ErrorParseMediaType       = "couldn't parse media type"
+	ErrorUnsupportedMediaType = "unsupported media type"
+	ErrorGetBody              = "couldn't get body"
+	ErrorParseBody            = "couldn't parse body"
+	ErrorUnsupportedSchemaId  = "unsupported schema id"
+)
+
 func init() {
 	caddy.RegisterModule(AzAlertSlackNotif{})
 }
@@ -65,37 +74,42 @@ func (an AzAlertSlackNotif) ServeHTTP(w http.ResponseWriter, r *http.Request, ne
 func (an AzAlertSlackNotif) transformedBody(r *http.Request) error {
 
 	if r == nil || r.Body == nil {
-		an.logger.Warn("empty request or body")
-		return fmt.Errorf("empty request or body")
+		an.logger.Warn(ErrorNilReqBody)
+		return fmt.Errorf(ErrorNilReqBody)
 	}
 
 	mType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 
 	if err != nil {
-		an.logger.Error("couldn't parse media type", zap.Error(err))
+		an.logger.Error(ErrorParseMediaType, zap.Error(err))
 		return err
 	}
 
 	if !alert.ContentTypeSupported(mType) {
-		an.logger.Warn("unsupported media type", zap.String("Content-Type", mType))
-		return fmt.Errorf("unsupported media type: %s", mType)
+		an.logger.Warn(ErrorUnsupportedMediaType, zap.String("Content-Type", mType))
+		return fmt.Errorf(ErrorUnsupportedMediaType+": %s", mType)
 	}
 
 	doTransform := func() (io.ReadCloser, int, error) {
 
 		existingBodyBuf := new(bytes.Buffer)
 		if _, err := io.Copy(existingBodyBuf, r.Body); err != nil {
-			an.logger.Error("couldn't get body", zap.Error(err))
+			an.logger.Error(ErrorGetBody, zap.Error(err))
 			return nil, 0, err
 		}
 
 		an.logger.Debug("existing body", zap.String("body", existingBodyBuf.String()))
 
-		alert := alert.Parse(existingBodyBuf.String())
+		alert, err := alert.Parse(existingBodyBuf.String())
+
+		if err != nil {
+			an.logger.Error(ErrorParseBody, zap.Error(err))
+			return nil, 0, err
+		}
 
 		if !alert.SchemaIdSupported() {
-			an.logger.Warn("unsupported schema id", zap.String("SchemaId", alert.SchemaId))
-			return nil, 0, fmt.Errorf("unsupported schema id: %s", alert.SchemaId)
+			an.logger.Warn(ErrorUnsupportedSchemaId, zap.String("SchemaId", alert.SchemaId))
+			return nil, 0, fmt.Errorf(ErrorUnsupportedSchemaId+": %s", alert.SchemaId)
 		}
 
 		notificationByte := transform.AlertToNotification(alert).Json()

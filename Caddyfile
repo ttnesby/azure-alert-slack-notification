@@ -1,10 +1,11 @@
 {
 	order coraza_waf first
 	order rate_limit before basicauth
+	order az_alert_slack_notification before reverse_proxy
 
 	log {
 		format console
-		level info
+		level debug
 	}
 }
 
@@ -19,11 +20,11 @@
 http://localhost:8080 {
 	encode zstd gzip
 
-	route /api/slack/testevarsel* {
+	handle /api/slack/testevarsel* {
 		import to-slack {$SLACK_TEST_NOTIFICATION}
 	}
 
-	route /api/slack/azureplatformalerts* {
+	handle /api/slack/azureplatformalerts* {
 		import to-slack {$SLACK_PROD_NOTIFICATION}
 	}
 
@@ -31,8 +32,8 @@ http://localhost:8080 {
 		respond "I'm fine" 200
 	}
 
-	handle_err {
-		respond 400 # bad request
+	handle_errors {
+		respond "nope" 400
 	}
 }
 

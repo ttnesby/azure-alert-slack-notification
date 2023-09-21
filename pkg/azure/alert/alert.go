@@ -38,15 +38,15 @@ type CommonAlertSchema struct {
 	Data     Essentials `json:"data"`
 }
 
-func Parse(s string) *CommonAlertSchema {
+func Parse(s string) (*CommonAlertSchema, error) {
 	var alert CommonAlertSchema
 	err := json.Unmarshal([]byte(s), &alert)
 
 	if err != nil {
-		fmt.Println(fmt.Errorf("unmarshal failed for %s", s))
+		return nil, fmt.Errorf("unmarshal failed for %s", s)
 	}
 
-	return &alert
+	return &alert, nil
 }
 
 func ContentTypeSupported(ct string) bool {
