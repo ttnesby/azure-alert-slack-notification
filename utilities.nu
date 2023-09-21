@@ -5,17 +5,17 @@ export def t-alert [] {
 
 export def te-alert [] {
     let url = "http://localhost/api/slack/testevarsel"
-    "empty body\n"
+    print "### test case: empty body\n\n "
     '' | curl -X POST --include ($url)
-    "\n\n"
+    print "\n\n"
 
-    "wrong content type\n"
+    print "### test case: unsupported content type\n\n"
     '{}' | curl --header "Content-Type: application/xml" --include --data $'($in)' ($url)
-    "\n\n"
+    print "\n\n"
 
-    "wrong schema id\n"
+    print "### test case: unsupported schema id\n\n"
     '{}' | curl --header "Content-Type: application/json" --include --data $'($in)' ($url)
-    "\n\n"
+    print "\n\n"
 }
 
 export def p-alert [] {

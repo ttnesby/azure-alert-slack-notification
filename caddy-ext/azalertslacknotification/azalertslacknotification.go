@@ -94,7 +94,7 @@ func (an AzAlertSlackNotif) transformedBody(r *http.Request) error {
 
 		existingBodyBuf := new(bytes.Buffer)
 		if _, err := io.Copy(existingBodyBuf, r.Body); err != nil {
-			an.logger.Error(ErrorGetBody, zap.Error(err))
+			an.logger.Warn(ErrorGetBody, zap.Error(err))
 			return nil, 0, err
 		}
 
@@ -103,7 +103,7 @@ func (an AzAlertSlackNotif) transformedBody(r *http.Request) error {
 		alert, err := alert.Parse(existingBodyBuf.String())
 
 		if err != nil {
-			an.logger.Error(ErrorParseBody, zap.Error(err))
+			an.logger.Warn(ErrorParseBody, zap.Error(err))
 			return nil, 0, err
 		}
 
