@@ -15,27 +15,38 @@ The `./utilities.nu` defines basic utilities.
 use ./utilities.nu *
 ```
 
-- `true | env-setup`, load environment dependencies, see `Caddyfile`
-- `false | env-setup`, remove environment dependencies
-- `'v0.1.19' | r-ca`, create new release and build new version of caddy
+- `e-setup [false]`, load environment dependencies, see `Caddyfile`. Default `true`, remove environment dependencies with `false`
+
+- `r-ca vMa.Mi.Path... [branch]`, create new release and build new version of caddy. Default branch is `main`
+- `b-ca vMa.Mi.Path...`, build new version of caddy
+
 - `u-ca`, start caddy with Caddyfile
 - `d-ca`, stop caddy
-- `t-alert`, send test alert to caddy, received in slack#test_varsel
+
+- `t-alert`, send test alert to caddy, received in slack#teste_varsel
+- `te-alert`, send errorneous requests
+
 - `p-alert`, send test alert to caddy, received in slack#azure-platform-alerts
+- `h-status`, ask for health status
 
 ```nushell
 # when entering repo root
 use ./utilities.nu *
 
 # activate env vars
-true | env-setup
+e-setup
 
 # :iteration
 # start caddy
 u-ca
 
+# check health status
+h-status
+
 # fire off alert to slack test
 t-alert
+te-alert
+
 
 # fire off alert to slack prod
 p-alert
@@ -44,10 +55,10 @@ p-alert
 d-ca
 
 # do some coding and create new release, build new caddy
-'v0.1.20' | r-ca
+r-ca vx.y.z... [branch]
 
 # goto :iteration
 
 # remove env vars
-false | env-setup
+e-setup false
 ```

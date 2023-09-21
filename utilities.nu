@@ -28,10 +28,6 @@ export def p-alert [] {
     curl --header "Content-Type: application/json" --include --data $'($in)' http://localhost/api/slack/azureplatformalerts
 }
 
-export def pe-alert [] {
-    '{}' | curl --header "Content-Type: application/json" --include --data $'($in)' http://localhost/api/slack/azureplatformalerts
-}
-
 export def h-status [] {
     curl http://localhost/api/health
 }
@@ -59,9 +55,11 @@ export def b-ca [ver: string] {
     let ext3 = $"github.com/mholt/caddy-ratelimit"      # rate limiter
     ~/go/bin/xcaddy build --with ($ext1) --with ($ext2) --with ($ext3)
 }
+
 export def u-ca [] {
     ./caddy start Caddyfile
 }
+
 export def d-ca [] {
     ./caddy stop
 }
