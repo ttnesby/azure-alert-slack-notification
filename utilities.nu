@@ -5,16 +5,21 @@ export def t-alert [] {
 
 export def te-alert [] {
     let url = "http://localhost/api/slack/testevarsel"
-    print "### test case: empty body\n\n "
-    '' | curl -X POST --header "Content-Type: text/html" --include ($url)
-    print "\n\n"
 
-    print "### test case: unsupported content type\n\n"
+    print "### test case: WAF - invalid media type\n\n"
+    '{}' | curl --header "Content-Type: invalidMediaType" --include --data $'($in)' ($url)
+    print "\n\n"    
+
+    print "### test case: unsupported media type\n\n"
     '{}' | curl --header "Content-Type: text/xml" --include --data $'($in)' ($url)
     print "\n\n"
 
+    print "### test case: cannot parse body\n\n "
+    '' | curl -X POST --header "Content-Type: application/json" --include --data $'($in)' ($url)
+    print "\n\n"
+
     print "### test case: unsupported schema id\n\n"
-    '{}' | curl --header "Content-Type: application/json" --include --data $'($in)' ($url)
+    '{"schemaId":"unsupportedSchema"}' | curl --header "Content-Type: application/json" --include --data $'($in)' ($url)
     print "\n\n"
 }
 

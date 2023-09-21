@@ -4,8 +4,8 @@
 	order az_alert_slack_notification before reverse_proxy
 
 	log {
-		format console
-		level debug
+		#format console
+		level info
 	}
 }
 
