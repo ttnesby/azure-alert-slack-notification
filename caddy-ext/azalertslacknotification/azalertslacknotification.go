@@ -69,12 +69,15 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
 		return
 	}
 
+	// verify Content-Type application/json
+
 	doTransform := func() (io.ReadCloser, int, error) {
 		buf := new(bytes.Buffer)
 		_, _ = io.Copy(buf, r.Body) // reasonable error handling, not yet...
 
 		an.logger.Debug("before body", zap.String("body", buf.String()))
 
+		// verify "schemaId":"azureMonitorCommonAlertSchema"
 		r := transform.AlertToNotification(alert.Parse(buf.String())).Json()
 
 		an.logger.Debug("transformed body", zap.String("body", string(r)))

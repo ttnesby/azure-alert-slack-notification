@@ -20,6 +20,8 @@ use ./utilities.nu *
 - `'v0.1.19' | r-ca`, create new release and build new version of caddy
 - `u-ca`, start caddy with Caddyfile
 - `d-ca`, stop caddy
+- `t-alert`, send test alert to caddy, received in slack#test_varsel
+- `p-alert`, send test alert to caddy, received in slack#azure-platform-alerts
 
 ```nushell
 # when entering repo root
@@ -28,19 +30,24 @@ use ./utilities.nu *
 # activate env vars
 true | env-setup
 
+# :iteration
 # start caddy
 u-ca
 
 # fire off alert to slack test
-alert-t
+t-alert
+
+# fire off alert to slack prod
+p-alert
 
 # stop caddy
 d-ca
 
 # do some coding and create new release, build new caddy
-'v0.1.19' | r-ca
+'v0.1.20' | r-ca
+
+# goto :iteration
 
 # remove env vars
 false | env-setup
 ```
-
