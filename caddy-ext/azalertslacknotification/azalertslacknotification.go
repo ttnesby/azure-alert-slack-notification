@@ -65,10 +65,16 @@ func (an AzAlertSlackNotif) TransformBody(r *http.Request) {
 	}
 
 	// verify Content-Type application/json
+	if ct := r.Header.Get("Content-Type"); ct != alert.ContentType {
+		an.logger.Warn("unsupported content type", zap.String("Content-Type", ct))
+	}
 
 	doTransform := func() (io.ReadCloser, int, error) {
+
 		buf := new(bytes.Buffer)
-		_, _ = io.Copy(buf, r.Body) // reasonable error handling, not yet...
+		if _, err := io.Copy(buf, r.Body); err != nil {
+			an.logger.Error("couldn't get body", zap.Error(err))
+		}
 
 		an.logger.Debug("before body", zap.String("body", buf.String()))
 
