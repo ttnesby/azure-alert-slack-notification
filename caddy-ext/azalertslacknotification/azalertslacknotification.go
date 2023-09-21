@@ -81,7 +81,7 @@ func (an AzAlertSlackNotif) transformedBody(r *http.Request) error {
 	mType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 
 	if err != nil {
-		an.logger.Error(ErrorParseMediaType, zap.Error(err))
+		an.logger.Warn(ErrorParseMediaType, zap.Error(err))
 		return err
 	}
 
