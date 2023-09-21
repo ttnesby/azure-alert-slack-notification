@@ -10,7 +10,6 @@ import (
 const (
 	UrlAlertBlade    = "https://portal.azure.com/#blade/Microsoft_Azure_Monitoring/AlertDetailsTemplateBlade/alertId/"
 	UrlResourceBlade = "https://portal.azure.com/#@nav.no/resource"
-	SchemaIdValue    = "azureMonitorCommonAlertSchema"
 )
 
 type Content struct {
@@ -39,13 +38,21 @@ type CommonAlertSchema struct {
 	Data     Essentials `json:"data"`
 }
 
-func Parse(s string) *CommonAlertSchema {
+func Parse(s string) (*CommonAlertSchema, error) {
 	var alert CommonAlertSchema
 	err := json.Unmarshal([]byte(s), &alert)
 
 	if err != nil {
-		fmt.Println(fmt.Errorf("unmarshal failed for %s", s))
+		return nil, fmt.Errorf("unmarshal failed for %s", s)
 	}
 
-	return &alert
+	return &alert, nil
+}
+
+func ContentTypeSupported(ct string) bool {
+	return (ct == "application/json")
+}
+
+func (cas *CommonAlertSchema) SchemaIdSupported() bool {
+	return (cas.SchemaId == "azureMonitorCommonAlertSchema")
 }
