@@ -12,7 +12,7 @@ import (
 
 func TestTransform(t *testing.T) {
 
-	alertSevs := []string{"Sev0", "Sev1", "Sev2", "Sev3", "Sev4", "unknown"}
+	alertSevs := []string{"Sev0", "Sev1", "Sev2", "Sev3", "Sev4", "unknown", "TestStart", "TestEnd"}
 
 	alertJson := func(sev string) string {
 		return fmt.Sprintf(`{

@@ -33,7 +33,7 @@ http://localhost:8080 {
 	}
 
 	handle_errors {
-		respond "nope" 400
+		respond 403
 	}
 }
 

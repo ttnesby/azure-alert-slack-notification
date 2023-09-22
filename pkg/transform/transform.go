@@ -2,6 +2,9 @@ package transform
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
+
 	"github.com/ttnesby/slack-block-builder/pkg/azure/alert"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/block/action"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/block/divider"
@@ -10,8 +13,6 @@ import (
 	"github.com/ttnesby/slack-block-builder/pkg/slack/notification"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/object/button"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
-	"net/url"
-	"strings"
 )
 
 func severity(a *alert.CommonAlertSchema) notification.Severity {
@@ -26,6 +27,10 @@ func severity(a *alert.CommonAlertSchema) notification.Severity {
 		return notification.SeverityInformation
 	case "Sev4":
 		return notification.SeverityVerbose
+	case "TestStart":
+		return notification.SevTestStart
+	case "TestEnd":
+		return notification.SevTestEnd
 	default:
 		return notification.SeverityUnknown
 	}

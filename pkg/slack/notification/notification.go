@@ -16,6 +16,10 @@ type Severity string
 const (
 	IconLink Icon = ":link:"
 
+	// custom severity codes for testing
+	SevTestStart Severity = ":test: START"
+	SevTestEnd   Severity = ":test: END"
+
 	SeverityUnknown     Severity = ":question: unknown"
 	SeverityVerbose     Severity = ":speech_balloon:  Verbose(4)"
 	SeverityInformation Severity = ":information_source:  Information(3)"
