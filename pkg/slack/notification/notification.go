@@ -2,6 +2,7 @@ package notification
 
 import (
 	"encoding/json"
+
 	"github.com/ttnesby/slack-block-builder/pkg/slack/block/action"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/block/divider"
 	"github.com/ttnesby/slack-block-builder/pkg/slack/block/header"

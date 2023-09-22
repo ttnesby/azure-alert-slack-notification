@@ -4,16 +4,19 @@ import "encoding/json"
 
 // https://api.slack.com/reference/block-kit/composition-objects#text
 
+type TextType string
+
 const (
-	TypePlain    = "plain_text"
-	TypeMarkDown = "mrkdwn"
-	EmptyText    = "M"
+	Plain    TextType = "plain_text"
+	MarkDown TextType = "mrkdwn"
+
+	EmptyText = "M"
 )
 
 type Text struct {
-	Type  string `json:"type"`            // plain_text, mrkdwn
-	Text  string `json:"text"`            // min 1 and max 3 000
-	Emoji *bool  `json:"emoji,omitempty"` // only relevant for plain_text
+	Type  TextType `json:"type"`            // plain_text, mrkdwn
+	Text  string   `json:"text"`            // min 1 and max 3 000
+	Emoji *bool    `json:"emoji,omitempty"` // only relevant for plain_text
 	//verbatim - not implemented
 }
 
@@ -22,7 +25,7 @@ func NewPlain(s string) *Text {
 	*t = true
 
 	return (&Text{
-		Type:  TypePlain,
+		Type:  Plain,
 		Text:  s,
 		Emoji: t,
 	}).FirstN(3000)
@@ -30,7 +33,7 @@ func NewPlain(s string) *Text {
 
 func NewMarkDown(s string) *Text {
 	return (&Text{
-		Type: TypeMarkDown,
+		Type: MarkDown,
 		Text: s,
 	}).FirstN(3000)
 }

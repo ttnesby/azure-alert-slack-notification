@@ -4,12 +4,14 @@ import "github.com/ttnesby/slack-block-builder/pkg/slack/object/button"
 
 // https://api.slack.com/reference/block-kit/blocks#actions
 
+type ActionType string
+
 const (
-	TypeAction = "actions"
+	CAction ActionType = "actions"
 )
 
 type Action struct {
-	Type     string           `json:"type"`
+	Type     ActionType       `json:"type"`
 	Elements []*button.Button `json:"elements"` // max 25 items
 }
 
@@ -24,7 +26,7 @@ func New(b ...*button.Button) *Action {
 	}
 
 	return &Action{
-		Type:     TypeAction,
+		Type:     CAction,
 		Elements: elementsFirstN(25),
 	}
 }

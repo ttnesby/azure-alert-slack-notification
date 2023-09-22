@@ -2,32 +2,31 @@ package section
 
 import (
 	"encoding/json"
+
 	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 )
 
+type SectionType string
+
 const (
-	TypeSection = "section"
+	CSection SectionType = "section"
 )
 
 // https://api.slack.com/reference/block-kit/blocks#section
 
 type Section struct {
-	Type   string       `json:"type"`
+	Type   SectionType  `json:"type"`
 	Text   *text.Text   `json:"text,omitempty"`   // max 3000 chars
 	Fields []*text.Text `json:"fields,omitempty"` // max 10 items, max 2000 chars each
 	//accessory - not implemented
 }
 
 func New() *Section {
-	return &Section{Type: TypeSection}
+	return &Section{Type: CSection}
 }
 
 func (s *Section) SetText(txt *text.Text) *Section {
-
-	if txt != nil && len(txt.Text) > 0 {
-		s.Text = txt
-	}
-
+	s.Text = txt
 	return s
 }
 

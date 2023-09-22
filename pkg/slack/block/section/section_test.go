@@ -2,8 +2,9 @@ package section
 
 import (
 	"fmt"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 	"testing"
+
+	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 )
 
 func listJson(a []*text.Text) string {
@@ -23,7 +24,7 @@ func TestText(t *testing.T) {
 	t.Parallel()
 
 	expected := func(s string) string {
-		return fmt.Sprintf(`{"type":"%s","text":%s}`, TypeSection, s)
+		return fmt.Sprintf(`{"type":"%s","text":%s}`, CSection, s)
 	}
 	txt := text.NewPlain("hei på deg")
 
@@ -42,13 +43,35 @@ func TestFields(t *testing.T) {
 	t.Parallel()
 
 	expected := func(s string) string {
-		return fmt.Sprintf(`{"type":"%s","fields":%s}`, TypeSection, s)
+		return fmt.Sprintf(`{"type":"%s","fields":%s}`, CSection, s)
 	}
 
-	to := []*text.Text{text.NewMarkDown("*k1*"), text.NewPlain("v1")}
-	sec := New().SetFields(to[0], to[1])
+	to := []*text.Text{
+		text.NewMarkDown("*k1*"),
+		text.NewPlain("v2"),
+		text.NewMarkDown("*k3*"),
+		text.NewPlain("v4"),
+		text.NewMarkDown("*k5*"),
+		text.NewPlain("v6"),
+		text.NewMarkDown("*k7*"),
+		text.NewPlain("v8"),
+		text.NewMarkDown("*k9*"),
+		text.NewPlain("v10"),
+		text.NewMarkDown("*k11*"),
+		text.NewPlain("v12"),
+	}
 
-	if sec.Json() != expected(listJson(to)) {
+	// >10 elements returns exactly 10 elements
+	sec := New().SetFields(to...)
+
+	if sec.Json() != expected(listJson(to[:10])) {
+		t.Errorf("%s", "json failure")
+	}
+
+	// < 10 returns the same number of elements
+	sec = New().SetFields(to[:4]...)
+
+	if sec.Json() != expected(listJson(to[:4])) {
 		t.Errorf("%s", "json failure")
 	}
 }

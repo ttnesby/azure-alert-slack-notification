@@ -4,21 +4,23 @@ import (
 	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
 )
 
+type HeaderType string
+
 const (
-	TypeHeader = "header"
+	CHeader HeaderType = "header"
 )
 
 // https://api.slack.com/reference/block-kit/blocks#header
 
 type Header struct {
-	Type string     `json:"type"`
+	Type HeaderType `json:"type"`
 	Text *text.Text `json:"text"` // only plain_text and max 150 chars
 }
 
 func New(title string) *Header {
 
 	return &Header{
-		Type: TypeHeader,
+		Type: CHeader,
 		Text: text.NewPlain(title).FirstN(150),
 	}
 }

@@ -1,51 +1,77 @@
 package text
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 )
 
-func TestPlain(t *testing.T) {
-
+func TestText(t *testing.T) {
 	t.Parallel()
 
-	expected := func(s string) string {
-		return fmt.Sprintf(`{"type":"%s","text":"%s","emoji":true}`, TypePlain, s)
+	const (
+		ie = ""
+		it = "hei på deg!"
+	)
+
+	expect := func(t TextType, s string) string {
+		if t == Plain {
+			return fmt.Sprintf(`{"type":"%s","text":"%s","emoji":true}`, t, s)
+		} else {
+			return fmt.Sprintf(`{"type":"%s","text":"%s"}`, t, s)
+		}
 	}
 
-	str := "hei på deg"
-
-	text := NewPlain(str)
-
-	if text.Json() != expected(str) {
-		t.Errorf("%s", "json failure")
+	expectJsonString := func(t TextType, s string) string {
+		js, _ := json.Marshal(s)
+		if t == Plain {
+			return fmt.Sprintf(`{"type":"%s","text":%s,"emoji":true}`, t, string(js))
+		} else {
+			return fmt.Sprintf(`{"type":"%s","text":%s}`, t, string(js))
+		}
 	}
 
-	n := 2
-	if str[:n] != text.FirstN(n).Text {
-		t.Errorf("%s", "FirstN failure")
+	testData := []struct {
+		input  string
+		fun    func(string) *Text
+		expect string
+	}{
+		{
+			input:  ie,
+			fun:    NewPlain,
+			expect: expect(Plain, EmptyText),
+		},
+		{
+			input:  it,
+			fun:    NewPlain,
+			expect: expect(Plain, it),
+		},
+		{
+			input:  long3003,
+			fun:    NewPlain,
+			expect: expectJsonString(Plain, long3000),
+		},
+		{
+			input:  ie,
+			fun:    NewMarkDown,
+			expect: expect(MarkDown, EmptyText),
+		},
+		{
+			input:  it,
+			fun:    NewMarkDown,
+			expect: expect(MarkDown, it),
+		},
+		{
+			input:  long3003,
+			fun:    NewMarkDown,
+			expect: expectJsonString(MarkDown, long3000),
+		},
 	}
 
-	if NewPlain("").Json() != expected(EmptyText) {
-		t.Errorf("%s", "empty text jason failure")
-	}
-}
-
-func TestMarkDown(t *testing.T) {
-
-	t.Parallel()
-
-	expected := func(s string) string {
-		return fmt.Sprintf(`{"type":"%s","text":"%s"}`, TypeMarkDown, s)
-	}
-
-	str := "hei *på* deg"
-
-	if NewMarkDown(str).Json() != expected(str) {
-		t.Errorf("%s", "json failure")
-	}
-
-	if NewMarkDown("").Json() != expected(EmptyText) {
-		t.Errorf("%s", "empty text jason failure")
+	for i, td := range testData {
+		actual := td.fun(td.input).Json()
+		if actual != td.expect {
+			t.Errorf("Test %d: Got %s but should have: %s", i, actual, td.expect)
+		}
 	}
 }
