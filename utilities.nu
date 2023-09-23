@@ -1,5 +1,7 @@
+# different severities related to azure alert, except from unknown
 const severities = ['Sev0' 'Sev1' 'Sev2' 'Sev3' 'Sev4' 'unknown']
 
+# test json payload for different test scenarios
 export def alertJson [sev: string] {
     {
         "schemaId":"azureMonitorCommonAlertSchema",
@@ -85,7 +87,7 @@ export def h-status [] {
     http get http://localhost/api/health --full --allow-errors | reject headers
 }
 
-# set | unset required environment variables for Caddyfile
+# set | unset required environment variables for Caddyfile, web hook secrets for related slack channels
 export def-env e-setup [set: bool = true] {
     let secretStoreMap = {
         SLACK_TESTEVARSEL:['op://Development' SlackTesteVarsel 'CREDENTIAL/secret_path'],
