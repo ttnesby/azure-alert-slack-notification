@@ -21,11 +21,11 @@ http://localhost:8080 {
 	encode zstd gzip
 
 	handle /api/slack/testevarsel* {
-		import to-slack {$SLACK_TEST_NOTIFICATION}
+		import to-slack {$SLACK_TESTEVARSEL}
 	}
 
 	handle /api/slack/azureplatformalerts* {
-		import to-slack {$SLACK_PROD_NOTIFICATION}
+		import to-slack {$SLACK_AZUREPLATFORMALERTS}
 	}
 
 	handle /api/health* {
