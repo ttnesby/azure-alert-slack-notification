@@ -2,7 +2,7 @@
 const severities = ['Sev0' 'Sev1' 'Sev2' 'Sev3' 'Sev4' 'unknown']
 
 # test json payload for different test scenarios
-export def alertJson [sev: string] {
+def alertJson [sev: string] {
     {
         "schemaId":"azureMonitorCommonAlertSchema",
         "data":{
@@ -88,7 +88,7 @@ export def h-status [] {
 }
 
 # set | unset required environment variables for Caddyfile, web hook secrets for related slack channels
-export def-env e-setup [set: bool = true] {
+def-env e-setup [set: bool = true] {
     let secretStoreMap = {
         SLACK_TESTEVARSEL:['op://Development' SlackTesteVarsel 'CREDENTIAL/secret_path'],
         SLACK_AZUREPLATFORMALERTS:['op://Development' SlackAzurePlatformAlerts 'CREDENTIAL/secret_path']
@@ -109,6 +109,7 @@ export def-env e-setup [set: bool = true] {
         | reduce -f {} {|e, acc| $acc | merge $e }
         | load-env
     } else {
+        # using overlays...
         # how to remove env var in current scope??
         #$existing.item | each {|v| hide-env $v}
     }
