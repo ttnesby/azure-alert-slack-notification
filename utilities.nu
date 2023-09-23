@@ -29,21 +29,21 @@ export def t-alert [] {
     let url = 'http://localhost/api/slack/testevarsel'
     let ct = 'application/json'
 
-    let start = 'TestStart' | http post --content-type $ct  $url (alertJson $in) --full --allow-errors | reject headers 
+    let start = 'TestStart' | http post --content-type $ct  $url (alertJson $in) --full --allow-errors | reject headers
     let allSevs = $severities | par-each --keep-order {|sev| http post --content-type $ct $url (alertJson $sev) --full --allow-errors} | reject headers
     let end = 'TestEnd' | http post --content-type $ct $url (alertJson $in) --full --allow-errors | reject headers
 
-    [$start $allSevs $end] 
-    | flatten 
+    [$start $allSevs $end]
+    | flatten
     | reduce -f 0 {|_, acc| $acc + 1 }
     | print $"($in) requests sent"
 }
 
 # test rate limit of < 120 req/1min window against /api/health, should give (x - 120) "429 Too Many Requests"
 export def tr-health [noOfReq: int] {
-    1..$noOfReq 
-    | par-each --keep-order {|| http get http://localhost/api/health --full --allow-errors} 
-    | filter {|el| $el.status == 429 } 
+    1..$noOfReq
+    | par-each --keep-order {|| http get http://localhost/api/health --full --allow-errors}
+    | filter {|el| $el.status == 429 }
     | reduce -f 0 {|_,acc| $acc + 1}
     | print $"No of 429 'Too Many Requests': ($in)"
 }
@@ -65,7 +65,7 @@ export def te-alert [] {
     #print $"\nstatus (http post --content-type $ctUns $url 'plain' --full --allow-errors | get status)\n"
 
     print "### test case: cannot parse body\n"
-    print $"\nstatus (http post --content-type $ct $url '' --full --allow-errors | get status)\n" 
+    print $"\nstatus (http post --content-type $ct $url '' --full --allow-errors | get status)\n"
 
     print "### test case: unsupported schema id\n"
     print $"status (http post --content-type $ct $url {schemaId:unsupportedSchema} --full --allow-errors | get status )\n"
@@ -87,14 +87,28 @@ export def h-status [] {
 
 # set | unset required environment variables for Caddyfile
 export def-env e-setup [set: bool = true] {
-    if $set {
-        load-env {
-            $"(op read op://Development/SlackTestNotification/CREDENTIAL/env_var)":$"(op read op://Development/SlackTestNotification/CREDENTIAL/secret_path)",
-            $"(op read op://Development/SlackProdNotification/CREDENTIAL/env_var)":$"(op read op://Development/SlackProdNotification/CREDENTIAL/secret_path)",
+    let secretStoreMap = {
+        SLACK_TESTEVARSEL:['op://Development' SlackTesteVarsel 'CREDENTIAL/secret_path'],
+        SLACK_AZUREPLATFORMALERTS:['op://Development' SlackAzurePlatformAlerts 'CREDENTIAL/secret_path']
         }
+    let envVars = $secretStoreMap | items {|key,_| $key} | enumerate
+
+    let statusEnvVars = $env | items {|key,_| $key } | filter {|e| $e =~ 'SLACK_*'} | enumerate
+    let missing = if ($statusEnvVars | is-empty) {$envVars} else { $statusEnvVars | filter {|e| $e.item not-in $envVars.item}}
+    let existing = $statusEnvVars | filter {|e| $e.item in $envVars.item}
+
+    if $set {
+        $missing.item
+        | each {|v|
+            let opPath = $secretStoreMap | transpose | filter {|e| $e.column0 == $v} | get column1 | first | path join
+            let opSecret = $"(op read $opPath)"
+            {$v:$opSecret}
+        }
+        | reduce -f {} {|e, acc| $acc | merge $e }
+        | load-env
     } else {
-        hide-env $"(op read op://Development/SlackTestNotification/CREDENTIAL/env_var)"
-        hide-env $"(op read op://Development/SlackProdNotification/CREDENTIAL/env_var)"
+        # how to remove env var in current scope??
+        #$existing.item | each {|v| hide-env $v}
     }
 }
 
@@ -114,10 +128,13 @@ export def b-ca [ver: string] {
 
 # start caddy with local Caddyfile
 export def u-ca [] {
+    e-setup
+    ps | where name == caddy | get pid | each {|e| kill $e }
     ./caddy start Caddyfile
 }
 
 # stop caddy
 export def d-ca [] {
-    ./caddy stop
+    ps | where name == caddy | get pid | each {|e| kill $e }
+    #./caddy stop
 }
