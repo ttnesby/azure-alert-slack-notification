@@ -6,7 +6,7 @@ require (
 	github.com/caddyserver/caddy/v2 v2.7.4
 	github.com/corazawaf/coraza-caddy/v2 v2.0.0-rc.3
 	github.com/mholt/caddy-ratelimit v0.0.0-20230617210100-2dc0d586f0b8
-	github.com/ttnesby/slack-block-builder v0.1.33
+	github.com/ttnesby/azure-alert-slack-notification/caddy-ext v0.0.0-20230924111126-872c51b73533
 )
 
 require (
