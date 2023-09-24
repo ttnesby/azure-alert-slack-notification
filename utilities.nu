@@ -118,7 +118,7 @@ def-env e-setup [set: bool = true] {
 # create a new release with default branch main
 export def r-ca [ver: string, branch: string = "main"] {
     gh release create ($ver) --notes "wip" --target ($branch)
-    b-ca $ver
+    #b-ca $ver
 }
 
 # build a new version of caddy and relevant extensions

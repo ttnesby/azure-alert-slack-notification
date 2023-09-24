@@ -33,9 +33,9 @@ import (
 
 	// plug in Caddy modules here
 	_ "github.com/caddyserver/caddy/v2/modules/standard"
-	_ "github.com/ttnesby/slack-block-builder/caddy-ext/azalertslacknotification"
 	_ "github.com/corazawaf/coraza-caddy/v2"
 	_ "github.com/mholt/caddy-ratelimit"
+	_ "github.com/ttnesby/slack-block-builder/caddy-ext/azalertslacknotification"
 )
 
 func main() {
