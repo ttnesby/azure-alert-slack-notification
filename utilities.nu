@@ -122,12 +122,20 @@ export def r-ca [ver: string, branch: string = "main"] {
 }
 
 # build a new version of caddy and relevant extensions
-export def b-ca [] {
+export def cb-ca [] {
     print "\n### do ext. tests\n"
     go test -cover ./caddy-ext/pkg/...
 
     print "\n### build custom caddy with latest of ext.\n"
     go build -o ./caddy ./cmd/caddy
+}
+
+export def mb-ca [] {
+    print "\n### do ext. tests\n"
+    go test -cover ./caddy-ext/pkg/...
+
+    print "\n### build multi architecture of custom caddy with latest of ext.\n"
+    dagger run go run cmd/multibuilder/main.go
 }
 
 # start caddy with local Caddyfile
