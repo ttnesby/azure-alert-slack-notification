@@ -25,6 +25,7 @@
 
 # Generated caddy executable
 /caddy
+/build
 
 # Go workspace file
 go.work
