@@ -89,6 +89,7 @@ export def h-status [] {
 
 # set | unset required environment variables for Caddyfile, web hook secrets for related slack channels
 def-env e-setup [set: bool = true] {
+    print "\n### make required env. vars available\n"
     let secretStoreMap = {
         SLACK_TESTEVARSEL:['op://Development' SlackTesteVarsel 'CREDENTIAL/secret_path'],
         SLACK_AZUREPLATFORMALERTS:['op://Development' SlackAzurePlatformAlerts 'CREDENTIAL/secret_path']
@@ -117,23 +118,23 @@ def-env e-setup [set: bool = true] {
 
 # create a new release with default branch main
 export def r-ca [ver: string, branch: string = "main"] {
+    print "\n### do ext. tests\n"
+    go test -cover ./caddy-ext/pkg/...
+
+    print $"\n### create new relase of ext. - branch [($branch) version [($ver)]] \n"
     gh release create ($ver) --notes "wip" --target ($branch)
-    b-ca
+
+    cb-ca
+    mb-ca
 }
 
 # build a new version of caddy and relevant extensions
 export def cb-ca [] {
-    print "\n### do ext. tests\n"
-    go test -cover ./caddy-ext/pkg/...
-
     print "\n### build custom caddy with latest of ext.\n"
     go build -o ./caddy ./cmd/caddy
 }
 
 export def mb-ca [] {
-    print "\n### do ext. tests\n"
-    go test -cover ./caddy-ext/pkg/...
-
     print "\n### build multi architecture of custom caddy with latest of ext.\n"
     dagger run go run cmd/multibuilder/main.go
 }
@@ -141,12 +142,14 @@ export def mb-ca [] {
 # start caddy with local Caddyfile
 export def u-ca [] {
     e-setup
-    ps | where name == caddy | get pid | each {|e| kill $e }
+    d-ca
+    print "\n### fire up custom caddy\n"
     ./caddy start Caddyfile
 }
 
 # stop caddy
 export def d-ca [] {
+    print "\n### if caddy is runing, take it(/them) down\n"
     ps | where name == caddy | get pid | each {|e| kill $e }
     #./caddy stop
 }
