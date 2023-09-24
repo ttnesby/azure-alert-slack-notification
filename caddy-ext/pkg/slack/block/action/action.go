@@ -1,6 +1,6 @@
 package action
 
-import "github.com/ttnesby/slack-block-builder/pkg/slack/object/button"
+import "github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/object/button"
 
 // https://api.slack.com/reference/block-kit/blocks#actions
 

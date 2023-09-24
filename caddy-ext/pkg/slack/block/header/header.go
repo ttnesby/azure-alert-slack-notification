@@ -1,7 +1,7 @@
 package header
 
 import (
-	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/object/text"
 )
 
 type HeaderType string

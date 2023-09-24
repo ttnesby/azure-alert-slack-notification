@@ -5,14 +5,14 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ttnesby/slack-block-builder/pkg/azure/alert"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/block/action"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/block/divider"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/block/header"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/block/section"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/notification"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/object/button"
-	"github.com/ttnesby/slack-block-builder/pkg/slack/object/text"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/azure/alert"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/block/action"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/block/divider"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/block/header"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/block/section"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/notification"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/object/button"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/slack/object/text"
 )
 
 func severity(a *alert.CommonAlertSchema) notification.Severity {

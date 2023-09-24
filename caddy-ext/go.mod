@@ -1,4 +1,4 @@
-module github.com/ttnesby/slack-block-builder
+module github.com/ttnesby/azure-alert-slack-notification/caddy-ext
 
 go 1.21.1
 

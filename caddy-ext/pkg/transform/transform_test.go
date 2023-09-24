@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ttnesby/slack-block-builder/pkg/azure/alert"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/azure/alert"
 )
 
 // iff keen on verify the visual result

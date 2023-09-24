@@ -9,8 +9,8 @@ import (
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
-	"github.com/ttnesby/slack-block-builder/pkg/azure/alert"
-	"github.com/ttnesby/slack-block-builder/pkg/transform"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/azure/alert"
+	"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/pkg/transform"
 	"go.uber.org/zap"
 )
 
