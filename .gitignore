@@ -7,7 +7,7 @@
 *.dll
 *.so
 *.dylib
-**caddy
+#**caddy
 # Test binary, built with `go test -c`
 *.test
 
@@ -24,7 +24,7 @@
 .DS_Store
 
 # Generated caddy executable
-caddy
+/caddy
 
 # Go workspace file
 go.work
