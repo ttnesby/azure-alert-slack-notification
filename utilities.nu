@@ -123,7 +123,7 @@ export def r-ca [ver: string, branch: string = "main"] {
 
 # build a new version of caddy and relevant extensions
 export def b-ca [ver: string] {
-    let ext1 = $"github.com/ttnesby/slack-block-builder/caddy-ext/azalertslacknotification@($ver)"
+    let ext1 = $"github.com/ttnesby/azure-alert-slack-notification/caddy-ext/azalertslacknotification@($ver)"
     let ext2 = $"github.com/corazawaf/coraza-caddy/v2"  # waf
     let ext3 = $"github.com/mholt/caddy-ratelimit"      # rate limiter
     ~/go/bin/xcaddy build --with ($ext1) --with ($ext2) --with ($ext3)
