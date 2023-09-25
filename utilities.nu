@@ -37,17 +37,18 @@ export def t-alert [] {
 
     [$start $allSevs $end]
     | flatten
-    | reduce -f 0 {|_, acc| $acc + 1 }
-    | print $"($in) requests sent"
+    | each {|r| $r.status}
 }
 
 # test rate limit of < 120 req/1min window against /api/health, should give (x - 120) "429 Too Many Requests"
 export def tr-health [noOfReq: int] {
-    1..$noOfReq
-    | par-each --keep-order {|| http get http://localhost/api/health --full --allow-errors}
-    | filter {|el| $el.status == 429 }
-    | reduce -f 0 {|_,acc| $acc + 1}
-    | print $"No of 429 'Too Many Requests': ($in)"
+    if $noOfReq >= 1 {
+        1..$noOfReq
+        | par-each --keep-order {|| http get http://localhost/api/health --full --allow-errors}
+        | filter {|el| $el.status == 429 }
+        | reduce -f 0 {|_,acc| $acc + 1}
+        | print $"No of 429 'Too Many Requests': ($in)"
+    } 
 }
 
 # test different error situations, each genetating 403 Forbidden
@@ -128,12 +129,13 @@ export def r-ca [ver: string, branch: string = "main"] {
     mb-ca
 }
 
-# build a new version of caddy and relevant extensions
+# build a new version of caddy and relevant extensions, on current architecture
 export def cb-ca [] {
     print "\n### build custom caddy with latest of ext.\n"
     go build -o ./caddy ./cmd/caddy
 }
 
+# build multi-architecture of caddy and custom modules
 export def mb-ca [] {
     print "\n### build multi architecture of custom caddy with latest of ext.\n"
     dagger run go run cmd/multibuilder/main.go
