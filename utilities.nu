@@ -26,7 +26,7 @@ def alertJson [sev: string] {
     }
 }
 
-# generate slack notifications to #testevarsel, one for each severity, with test start and end
+# caddy - generate slack notifications to #testevarsel, one for each severity, with test start and end
 export def t-alert [] {
     let url = 'http://localhost/api/slack/testevarsel'
     let ct = 'application/json'
@@ -40,7 +40,7 @@ export def t-alert [] {
     | each {|r| $r.status}
 }
 
-# test rate limit of < 120 req/1min window against /api/health, should give (x - 120) "429 Too Many Requests"
+# caddy - test rate limit of < 120 req/1min window against /api/health, should give (x - 120) "429 Too Many Requests"
 export def tr-health [noOfReq: int] {
     if $noOfReq >= 1 {
         1..$noOfReq
@@ -51,7 +51,7 @@ export def tr-health [noOfReq: int] {
     } 
 }
 
-# test different error situations, each genetating 403 Forbidden
+# caddy - test different error situations, each genetating 403 Forbidden
 export def te-alert [] {
     let url = "http://localhost/api/slack/testevarsel"
 
@@ -74,7 +74,7 @@ export def te-alert [] {
     print $"status (http post --content-type $ct $url {schemaId:unsupportedSchema} --full --allow-errors | get status )\n"
 }
 
-# generate slack notification to #azure-platform-alerts, severity verbose
+# caddy - generate slack notification to #azure-platform-alerts, severity verbose
 export def p-alert [] {
     let url = 'http://localhost/api/slack/azureplatformalerts'
     let ct = 'application/json'
@@ -83,7 +83,7 @@ export def p-alert [] {
     'TestEnd' | http post --content-type $ct  $url (alertJson $in) --full --allow-errors | reject headers
 }
 
-# get health status of web server
+# caddy - get health status of web server
 export def h-status [] {
     http get http://localhost/api/health --full --allow-errors | reject headers
 }
@@ -117,7 +117,7 @@ def-env e-setup [set: bool = true] {
     }
 }
 
-# create a new release with default branch main
+# caddy - create a new release with default branch main
 export def r-ca [ver: string, branch: string = "main"] {
     print "\n### do ext. tests\n"
     go test -cover ./caddy-ext/pkg/...
@@ -129,19 +129,19 @@ export def r-ca [ver: string, branch: string = "main"] {
     mb-ca
 }
 
-# build a new version of caddy and relevant extensions, on current architecture
+# caddy - build a new version and relevant extensions, on current architecture
 export def cb-ca [] {
     print "\n### build custom caddy with latest of ext.\n"
     go build -o ./caddy ./cmd/caddy
 }
 
-# build multi-architecture of caddy and custom modules
+# caddy - build multi-architecture and custom modules
 export def mb-ca [] {
     print "\n### build multi architecture of custom caddy with latest of ext.\n"
     dagger run go run cmd/multibuilder/main.go
 }
 
-# start caddy with local Caddyfile
+# caddy - start with local Caddyfile
 export def u-ca [] {
     e-setup
     d-ca
@@ -149,7 +149,7 @@ export def u-ca [] {
     ./caddy start Caddyfile
 }
 
-# stop caddy
+# caddy - stop
 export def d-ca [] {
     print "\n### if caddy is runing, take it(/them) down\n"
     ps | where name == caddy | get pid | each {|e| kill $e }
