@@ -4,4 +4,5 @@ use (
 	./caddy-ext
 	./cmd/caddy
 	./cmd/multibuilder
+	./cmd/multiimage
 )
