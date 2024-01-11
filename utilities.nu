@@ -89,7 +89,7 @@ export def h-status [] {
 }
 
 # set | unset required environment variables for Caddyfile, web hook secrets for related slack channels
-def-env e-setup [set: bool = true] {
+def --env e-setup [set: bool = true] {
     print "\n### make required env. vars available\n"
     let secretStoreMap = {
         SLACK_TESTEVARSEL:['op://Development' SlackTesteVarsel 'CREDENTIAL/secret_path'],
