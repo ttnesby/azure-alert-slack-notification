@@ -1,6 +1,6 @@
 module github.com/ttnesby/azure-alert-slack-notification/caddy-ext
 
-go 1.21.1
+go 1.21.6
 
 require (
 	github.com/caddyserver/caddy/v2 v2.7.4
